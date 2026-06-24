@@ -23,5 +23,5 @@ ENV/
 Thumbs.db
 
 # Output files
-insights.json
-insights.md
+# insights.json
+# insights.md
