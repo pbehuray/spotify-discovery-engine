@@ -1,0 +1,6 @@
+supabase
+python-dotenv==1.0.0
+groq==1.4.0
+google-play-scraper==1.2.2
+requests==2.31.0
+beautifulsoup4==4.12.3
