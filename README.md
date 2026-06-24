@@ -1,113 +1,131 @@
-# Spotify Review Analysis Engine
+# Spotify Discovery Review Analysis Engine
 
-A classification engine that ingests user reviews from multiple sources, tags them against a fixed discovery taxonomy using LLM, and produces verifiable frequency counts and crosstabs.
+An AI classification pipeline that ingests Spotify user reviews from multiple sources, tags each one against a fixed **discovery taxonomy** using an LLM, and produces **verifiable frequency counts and crosstabs** — not summaries.
 
-## Project Structure
+## Headline finding (from `insights.md`)
+
+Across 456 classified reviews, **159 (34.9%) were discovery-related.** Among those:
+
+- **Top frustration:** stale recommendations (65), then control loss (37)
+- **Dominant segment:** active explorers (113) — users actively seeking new music
+- **Top desired behavior:** find new artists (88)
+- **Top unmet need:** "new music" (36)
+- **Key finding:** stale recommendations + loss of control account for 64% of all discovery frustrations
+
+> **In one line:** Active explorers want new music but face stale recommendations and have no control to steer toward fresher results.
+
+---
+
+## What this is (and isn't)
+
+This is a **classification engine**, not a retrieval/RAG system. Every review is tagged against a fixed taxonomy so the output is *countable and verifiable* (e.g. "52 reviews mention stale recommendations"), rather than an LLM-generated summary. This makes the insights defensible.
+
+## Architecture
 
 ```
-spotify-discovery/
+Data Sources ──▶ Supabase (Postgres) ──▶ Groq LLM Classifier ──▶ Aggregation ──▶ insights.json / insights.md
+  • Play Store      • raw_reviews          (llama-3.3-70b)        (counts +
+  • App Store       • tagged_reviews                              crosstabs)
+  • Reddit/Forum/Social
+```
+
+**Tech stack:** Python · Supabase (Postgres) · Groq (`llama-3.3-70b-versatile`)
+
+## Data sources — what is live vs hand-collected
+
+| Source | Method | Notes |
+|---|---|---|
+| **Play Store** | **Live scrape** via `google-play-scraper` (`play_store.py`) | Fetches fresh reviews from Google at runtime. Re-running pulls newer reviews. This is the statistical backbone (~12k reviews). |
+| App Store | Scraper attempted (`app_store.py`), hand-collected in practice | Apple's review feed is JS-rendered and access-limited, so the live scraper is unreliable; these reviews were hand-collected from public pages into `paste_sources.txt`. |
+| Reddit | Scraper attempted (`reddit_public.py`), hand-collected in practice | Reddit's public endpoint rate-limits aggressively; reviews were hand-collected from public threads into `paste_sources.txt`. |
+| Forum / Social | Hand-collected | No reliable scraper (per-site parsing / blocked APIs); collected from public pages into `paste_sources.txt`. |
+
+All sources flow through the **same normalization and the same classifier**, so they're analyzed identically. `app_store.py` and `reddit_public.py` are retained to show the attempted live-scraping paths; where a source could not be reliably scraped, it was hand-collected and loaded via `paste_importer.py`.
+
+## Project structure
+
+```
+spotify-discovery-engine/
   docs/
-    problemStatement.md      # Source of truth for what and why
-    build_brief.md           # Technical build spec with phases
-    architecture.md          # System architecture documentation
-  ingestion/                # Ingestion scripts (Phase 2)
-    play_store.py
-    app_store.py
-    paste_importer.py
-  paste_sources.txt         # Hand-collected forum/social posts
-  classify.py               # LLM classifier (Phase 3)
-  aggregate.py              # Aggregation and insights (Phase 4)
-  weekly_run.py             # Weekly refresh orchestrator (Phase 5 - optional)
-  test_db.py                # Phase 1 database connection test
-  init_db.sql               # SQL to initialize Supabase tables
-  requirements.txt          # Python dependencies
-  .env                      # API keys (gitignored)
-  .gitignore
-  README.md
+    problemStatement.md      # What and why (source of truth)
+    architecture.md          # System design
+  ingestion/
+    play_store.py            # Live Google Play scraper (Phase 2) — primary source
+    app_store.py             # App Store scraper attempt (unreliable; source hand-collected)
+    reddit_public.py         # Reddit public-endpoint scraper attempt (rate-limited; hand-collected)
+    paste_importer.py        # Imports hand-collected reviews from paste_sources.txt
+  paste_sources.txt          # Hand-collected App Store / Reddit / forum / social reviews
+  classify.py                # LLM classifier (Phase 3)
+  aggregate.py               # Aggregation + insights generation (Phase 4)
+  test_db.py                 # Phase 1 DB connection test
+  init_db.sql                # Creates raw_reviews + tagged_reviews tables
+  insights.json              # Generated output (machine-readable)
+  insights.md                # Generated output (human-readable)
+  requirements.txt
+  .env                       # API keys (gitignored — not in repo)
 ```
 
-## Phase 1: Project Skeleton + Supabase Connection
+---
 
-### Setup Instructions
+## How to run the full pipeline
 
-1. **Create Python virtual environment:**
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate  # On Windows
-   # or
-   source venv/bin/activate  # On Linux/Mac
-   ```
+### Setup
 
-2. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+# 1. Virtual environment
+python -m venv venv
+venv\Scripts\activate            # Windows
+# source venv/bin/activate       # Mac/Linux
 
-3. **Configure environment variables:**
-   - Copy `.env` and add your API keys:
-     - `SUPABASE_URL`: Your Supabase project URL (from Project Settings > API)
-     - `SUPABASE_KEY`: Your Supabase service role key (sb_secret_... format)
-     - `GROQ_API_KEY`: Your Groq API key (from https://console.groq.com/keys)
+# 2. Dependencies
+pip install -r requirements.txt
 
-4. **Initialize Supabase database:**
-   - Go to your Supabase project dashboard
-   - Navigate to SQL Editor
-   - Copy and run the SQL from `init_db.sql`
-   - This creates the `raw_reviews` and `tagged_reviews` tables
+# 3. Environment variables — create a .env file with:
+#    SUPABASE_URL=your-project-url
+#    SUPABASE_KEY=your-service-role-key   (sb_secret_... format)
+#    GROQ_API_KEY=your-groq-key           (from console.groq.com/keys)
 
-5. **Run the database connection test:**
-   ```bash
-   python test_db.py
-   ```
-
-### Expected Output
-
-If everything is configured correctly, you should see:
-```
-============================================================
-Phase 1: Supabase Connection Test
-============================================================
-Connecting to Supabase at: https://your-project.supabase.co
-
-Inserting test row with id: test_001
-✓ Insert successful
-
-Reading back test row with id: test_001
-✓ Read successful
-
-Retrieved row:
-  id: test_001
-  source: play_store
-  rating: 5
-  review_date: 2024-06-19T...
-  text: This is a test review for Phase 1 connectivity check.
-  scraped_at: 2024-06-19T...
-
-Cleaning up test row...
-✓ Cleanup successful
-
-============================================================
-✓ All tests passed! Database connection is working.
-============================================================
+# 4. Initialize the database
+#    Open your Supabase project → SQL Editor → run the contents of init_db.sql
 ```
 
-### Troubleshooting
+### Verify the connection (Phase 1)
 
-- **"SUPABASE_URL and SUPABASE_KEY must be set"**: Check that your `.env` file exists and contains the required values.
-- **"Insert failed"**: Make sure you've run `init_db.sql` in your Supabase SQL editor to create the tables.
-- **Connection errors**: Verify your Supabase URL and key are correct, and that your Supabase project is active.
+```bash
+python test_db.py
+# Expect: "✓ All tests passed! Database connection is working."
+```
 
-## Next Steps
+### Run the pipeline (Phases 2–4)
 
-After Phase 1 is verified:
-- **Phase 2**: Ingestion from Play Store, App Store, and paste_sources.txt
-- **Phase 3**: LLM classification using Groq
-- **Phase 4**: Aggregation and insights generation
-- **Phase 5**: Weekly refresh automation (optional)
+```bash
+# Phase 2 — ingest reviews
+python ingestion/play_store.py        # live scrape from Google Play
+python ingestion/paste_importer.py    # load hand-collected reviews
 
-## Notes
+# Phase 3 — classify with Groq
+python classify.py
 
-- All secrets are in `.env` (gitignored)
-- The project uses Supabase's new `sb_secret_...` key format
-- Every external call is wrapped in try/except with logging
-- All operations are idempotent (safe to re-run)
+# Phase 4 — aggregate into insights
+python aggregate.py
+```
+
+After Phase 4, see `insights.md` and `insights.json` for the results.
+
+---
+
+## Notes for evaluators
+
+- **Live scraping:** `play_store.py` fetches fresh reviews from Google Play at runtime — re-running pulls reviews posted since the last run. The pipeline is idempotent (safe to re-run; no duplicates, keyed on review ID).
+- **Sampling:** Classification runs on all hand-collected reviews plus a random sample of Play Store reviews (configurable at the top of `classify.py`). A random sample yields the same percentages as classifying everything, at a fraction of the cost.
+- **Groq free tier:** The free tier caps at 100k tokens/day. The classifier batches with rate-limit back-off and is idempotent, so it resumes safely across runs if the daily limit is hit.
+- **No secrets in the repo:** All keys live in `.env`, which is gitignored.
+- **Verifiable output:** Insights are frequency counts and crosstabs over the tagged data, not generated summaries — so every number can be traced back to classified rows.
+
+## Classification taxonomy (summary)
+
+- **Frustration types:** stale_recommendations, filter_bubble_lock_in, discovery_friction, algorithmic_sameness, poor_new_release_surfacing, context_blindness, over_personalization, control_loss, none
+- **Segments:** lapsed_explorer, active_explorer, passive_listener, genre_loyalist, mood_listener, podcast_first, unknown
+- **Desired behaviors:** find_new_artists, break_routine, match_mood_or_context, deep_dive_genre, social_discovery, rediscover_back_catalog, none
+
+(Full taxonomy and definitions in `docs/problemStatement.md`.)
