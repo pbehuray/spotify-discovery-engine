@@ -42,6 +42,32 @@ st.markdown(
         background-color: #1ed760;
         color: #ffffff;
     }}
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 8px;
+        background-color: #121212;
+    }}
+    .stTabs [data-baseweb="tab"] {{
+        background-color: #282828;
+        color: #ffffff;
+        border-radius: 4px;
+        padding: 8px 20px;
+        font-weight: 600;
+    }}
+    .stTabs [aria-selected="true"] {{
+        background-color: #1DB954;
+        color: #000000;
+    }}
+    .stTabs [data-baseweb="tab"]:hover {{
+        background-color: #1DB954;
+        color: #000000;
+    }}
+    .stMetric label {{
+        color: #b3b3b3;
+    }}
+    .stMetric [data-testid="stMetricValue"] {{
+        color: #1DB954;
+        font-size: 2rem;
+    }}
     .review-card {{
         background-color: #181818;
         border-radius: 12px;
