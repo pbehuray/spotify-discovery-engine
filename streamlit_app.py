@@ -140,7 +140,7 @@ with tab_live:
                 with st.spinner("Scraping the 5 most recent US Play Store reviews..."):
                     review_generator = run_live_demo(n=5)
 
-                status.info("Scraping complete. Classification takes ~30–60s per review...")
+                status.info("Scraping complete. Classifying with fast model...")
 
                 for i, review in enumerate(review_generator, start=1):
                     progress = int((i / 5) * 100)

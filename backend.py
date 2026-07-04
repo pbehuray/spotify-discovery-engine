@@ -88,13 +88,16 @@ MAX_RETRIES = 3
 SLEEP_BETWEEN_REQUESTS = 0.5
 RETRY_BACKOFF = 2
 
+# Use a smaller/faster model for the live demo to stay under Groq rate limits
+GROQ_DEMO_MODEL = "llama-3.1-8b-instant"
+
 
 def _get_groq_client():
     """Initialize Groq client from st.secrets or env."""
     api_key = _get_secret("GROQ_API_KEY")
     if not api_key:
         raise ValueError("GROQ_API_KEY not found in st.secrets or environment")
-    return Groq(api_key=api_key)
+    return Groq(api_key=api_key, timeout=30)
 
 
 def _get_supabase_client():
@@ -122,7 +125,7 @@ def classify_single_review(text):
     for attempt in range(MAX_RETRIES):
         try:
             response = groq_client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model=GROQ_DEMO_MODEL,
                 messages=[
                     {
                         "role": "system",
@@ -131,7 +134,8 @@ def classify_single_review(text):
                     {"role": "user", "content": prompt},
                 ],
                 temperature=0,
-                response_format={"type": "json_object"},
+                max_tokens=300,
+                timeout=30,
             )
 
             result_text = response.choices[0].message.content
