@@ -243,7 +243,7 @@ def run_live_demo(n=5):
     print("Starting live demo ingestion...")
 
     # Scrape only US for a fast demo, stop after 20 reviews so filtering leaves enough
-    raw_reviews = scrape_play_store_reviews(app_id="com.spotify.music", days=7, countries=["us"], max_reviews=20)
+    raw_reviews = scrape_play_store_reviews(app_id="com.spotify.music", days=30, countries=["us"], max_reviews=20)
     if not raw_reviews:
         print("No reviews scraped.")
         return
