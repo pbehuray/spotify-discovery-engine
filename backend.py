@@ -245,35 +245,6 @@ def run_live_demo(n=5):
     print(f"Live demo complete")
 
 
-def trigger_full_pipeline():
-    """
-    Trigger the GitHub Actions workflow_dispatch for pipeline.yml.
-    Alias for trigger_github_actions().
-    """
-    return trigger_github_actions()
-
-
-def load_insights():
-    """
-    Load insights.json from project root.
-
-    Returns:
-        Full insights dict
-    """
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    insights_path = os.path.join(project_root, "insights.json")
-    with open(insights_path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def _parse_repo():
-    """Parse owner/repo from st.secrets or env GITHUB_REPO."""
-    repo = _get_secret("GITHUB_REPO")
-    if not repo:
-        raise ValueError("GITHUB_REPO not found in st.secrets or environment")
-    return repo.strip()
-
-
 def trigger_github_actions():
     """
     Trigger the GitHub Actions workflow_dispatch for pipeline.yml.
@@ -300,6 +271,35 @@ def trigger_github_actions():
     except Exception as e:
         print(f"Failed to trigger GitHub Actions: {e}")
         return False
+
+
+def trigger_full_pipeline():
+    """
+    Trigger the GitHub Actions workflow_dispatch for pipeline.yml.
+    Alias for trigger_github_actions().
+    """
+    return trigger_github_actions()
+
+
+def _parse_repo():
+    """Parse owner/repo from st.secrets or env GITHUB_REPO."""
+    repo = _get_secret("GITHUB_REPO")
+    if not repo:
+        raise ValueError("GITHUB_REPO not found in st.secrets or environment")
+    return repo.strip()
+
+
+def load_insights():
+    """
+    Load insights.json from project root.
+
+    Returns:
+        Full insights dict
+    """
+    project_root = os.path.dirname(os.path.abspath(__file__))
+    insights_path = os.path.join(project_root, "insights.json")
+    with open(insights_path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def get_pipeline_run_status():

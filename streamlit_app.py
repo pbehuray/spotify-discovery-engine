@@ -4,7 +4,7 @@ Phase 5: Live demo dashboard
 """
 
 import streamlit as st
-from streamlit.backend import run_live_demo, trigger_full_pipeline
+from backend import run_live_demo, trigger_full_pipeline
 
 # --- Page config ---
 st.set_page_config(
