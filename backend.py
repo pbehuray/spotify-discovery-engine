@@ -221,16 +221,17 @@ def run_live_demo(n=5):
     """
     print("Starting live demo ingestion...")
 
-    # Scrape only US for a fast demo, stop after 10 reviews
-    raw_reviews = scrape_play_store_reviews(app_id="com.spotify.music", days=7, countries=["us"], max_reviews=10)
+    # Scrape only US for a fast demo, stop after 20 reviews so filtering leaves enough
+    raw_reviews = scrape_play_store_reviews(app_id="com.spotify.music", days=7, countries=["us"], max_reviews=20)
     if not raw_reviews:
         print("No reviews scraped.")
         return
 
-    # Sort by review date descending and take the n most recent
-    raw_reviews = sorted(raw_reviews, key=lambda r: r["at"], reverse=True)[:n]
-    normalized = [normalize_review(r) for r in raw_reviews]
-    print(f"Normalized {len(normalized)} most recent reviews")
+    # Sort by review date descending, keep only substantive reviews, then take n
+    raw_reviews = sorted(raw_reviews, key=lambda r: r["at"], reverse=True)
+    reviews = [r for r in raw_reviews if len(r.get("content", "")) > 50][:n]
+    normalized = [normalize_review(r) for r in reviews]
+    print(f"Normalized {len(normalized)} most recent substantive reviews")
 
     # Optionally upsert raw reviews to Supabase
     try:
