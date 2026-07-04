@@ -13,7 +13,7 @@ from google_play_scraper import Sort, reviews
 # Load environment variables
 load_dotenv()
 
-def scrape_play_store_reviews(app_id="com.spotify.music", days=7, lang="en", countries=["us", "in", "gb", "ca", "au"]):
+def scrape_play_store_reviews(app_id="com.spotify.music", days=7, lang="en", countries=["us", "in", "gb", "ca", "au"], max_reviews=None):
     """
     Scrape reviews from Google Play Store within the last N days.
     Pages through reviews using continuation tokens until date threshold is reached.
@@ -24,6 +24,7 @@ def scrape_play_store_reviews(app_id="com.spotify.music", days=7, lang="en", cou
         days: Number of days to look back (default: 7)
         lang: Language code (default: 'en' for English)
         countries: List of country codes to scrape from (default: ['us', 'in', 'gb', 'ca', 'au'])
+        max_reviews: Optional hard cap on total reviews to return (useful for demos)
     
     Returns:
         List of review dictionaries (raw from google_play-scraper)
@@ -92,7 +93,13 @@ def scrape_play_store_reviews(app_id="com.spotify.music", days=7, lang="en", cou
                     print(f"    Debug: {duplicate_count} duplicates, {old_review_count} old reviews in this batch")
                 
                 country_reviews.extend(batch_filtered)
-                print(f"  Page {page_count}: {len(batch_filtered)} new reviews (total: {len(country_reviews)})")
+                all_reviews.extend(batch_filtered)
+                print(f"  Page {page_count}: {len(batch_filtered)} new reviews (country: {len(country_reviews)}, total: {len(all_reviews)})")
+
+                # Stop if we have enough reviews for the demo
+                if max_reviews and len(all_reviews) >= max_reviews:
+                    print(f"  Reached max_reviews limit ({max_reviews})")
+                    break
                 
                 # Stop if no more reviews available
                 if not continuation_token:
@@ -111,13 +118,15 @@ def scrape_play_store_reviews(app_id="com.spotify.music", days=7, lang="en", cou
                 print(f"  ✗ Error scraping batch for {country.upper()}: {e}")
                 break
         
-        all_reviews.extend(country_reviews)
-        
         # Log summary for this country
         date_range_str = ""
         if earliest_date and latest_date:
             date_range_str = f" (date range: {earliest_date.isoformat()} to {latest_date.isoformat()})"
         print(f"✓ Completed {country.upper()}: {len(country_reviews)} reviews across {page_count} pages{date_range_str}")
+
+        # Stop moving to next country if we already have enough reviews
+        if max_reviews and len(all_reviews) >= max_reviews:
+            break
     
     print(f"\n✓ Total unique reviews across all countries: {len(all_reviews)}")
     print(f"✓ Reviews within {days}-day window: {len(all_reviews)}")
