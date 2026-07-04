@@ -9,7 +9,7 @@ on:
       play_store_days:
         description: 'Number of days to scrape from Play Store'
         required: false
-        default: '90'
+        default: '7'
         type: string
 
 jobs:

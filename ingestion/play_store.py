@@ -13,7 +13,7 @@ from google_play_scraper import Sort, reviews
 # Load environment variables
 load_dotenv()
 
-def scrape_play_store_reviews(app_id="com.spotify.music", days=90, lang="en", countries=["us", "in", "gb", "ca", "au"]):
+def scrape_play_store_reviews(app_id="com.spotify.music", days=7, lang="en", countries=["us", "in", "gb", "ca", "au"]):
     """
     Scrape reviews from Google Play Store within the last N days.
     Pages through reviews using continuation tokens until date threshold is reached.
@@ -21,7 +21,7 @@ def scrape_play_store_reviews(app_id="com.spotify.music", days=90, lang="en", co
     
     Args:
         app_id: Google Play Store app ID
-        days: Number of days to look back (default: 90)
+        days: Number of days to look back (default: 7)
         lang: Language code (default: 'en' for English)
         countries: List of country codes to scrape from (default: ['us', 'in', 'gb', 'ca', 'au'])
     
@@ -192,8 +192,8 @@ def main():
     print("Phase 2a: Play Store Ingestor")
     print("=" * 60)
     
-    # Scrape reviews from last 90 days, multiple countries
-    raw_reviews = scrape_play_store_reviews(days=90, lang="en", countries=["us", "in", "gb", "ca", "au"])
+    # Scrape reviews from last 7 days, multiple countries
+    raw_reviews = scrape_play_store_reviews(days=7, lang="en", countries=["us", "in", "gb", "ca", "au"])
     
     if not raw_reviews:
         print("\n✗ No reviews scraped. Exiting.")
