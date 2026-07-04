@@ -14,7 +14,10 @@ from google_play_scraper import Sort, reviews
 # Load environment variables
 load_dotenv()
 
-def scrape_play_store_reviews(app_id="com.spotify.music", days=7, lang="en", countries=["us", "in", "gb", "ca", "au"], max_reviews=None):
+MAX_REVIEWS_PER_RUN = 100
+
+
+def scrape_play_store_reviews(app_id="com.spotify.music", days=7, lang="en", countries=["us", "in", "gb", "ca", "au"], max_reviews=MAX_REVIEWS_PER_RUN):
     """
     Scrape reviews from Google Play Store within the last N days.
     Pages through reviews using continuation tokens until date threshold is reached.
@@ -25,7 +28,7 @@ def scrape_play_store_reviews(app_id="com.spotify.music", days=7, lang="en", cou
         days: Number of days to look back (default: 7)
         lang: Language code (default: 'en' for English)
         countries: List of country codes to scrape from (default: ['us', 'in', 'gb', 'ca', 'au'])
-        max_reviews: Optional hard cap on total reviews to return (useful for demos)
+        max_reviews: Hard cap on total reviews to return (default: MAX_REVIEWS_PER_RUN)
     
     Returns:
         List of review dictionaries (raw from google_play-scraper)
@@ -198,14 +201,14 @@ def upsert_reviews_to_supabase(reviews):
     print(f"\nOK Upsert complete: {success_count} successful, {failure_count} failed")
     return success_count, failure_count
 
-def main(days=7):
+def main(days=7, max_reviews=MAX_REVIEWS_PER_RUN):
     """Main execution function."""
     print("=" * 60)
     print("Phase 2a: Play Store Ingestor")
     print("=" * 60)
     
-    # Scrape reviews from last N days, multiple countries
-    raw_reviews = scrape_play_store_reviews(days=days, lang="en", countries=["us", "in", "gb", "ca", "au"])
+    # Scrape reviews from last N days, multiple countries, capped at max_reviews
+    raw_reviews = scrape_play_store_reviews(days=days, lang="en", countries=["us", "in", "gb", "ca", "au"], max_reviews=max_reviews)
     
     if not raw_reviews:
         print("\nERROR No reviews scraped. Exiting.")
@@ -229,5 +232,6 @@ def main(days=7):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--days", type=int, default=7)
+    parser.add_argument("--max-reviews", type=int, default=MAX_REVIEWS_PER_RUN)
     args = parser.parse_args()
-    main(days=args.days)
+    main(days=args.days, max_reviews=args.max_reviews)
