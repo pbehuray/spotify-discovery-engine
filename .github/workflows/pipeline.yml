@@ -54,7 +54,7 @@ jobs:
       - name: Classify unclassified reviews
         run: |
           echo "Starting classifier..."
-          python classify.py
+          python classify.py --limit 50
           echo "Classifier completed."
 
       - name: Aggregate insights

@@ -3,6 +3,7 @@ Phase 3: Classifier
 Classifies reviews using Groq LLM and upserts to tagged_reviews table.
 """
 
+import argparse
 import os
 import json
 import time
@@ -16,7 +17,7 @@ from groq import Groq
 load_dotenv()
 
 # Configuration
-PLAY_STORE_SAMPLE_SIZE = 400
+PLAY_STORE_SAMPLE_SIZE = 50
 BATCH_SIZE = 10
 SLEEP_BETWEEN_REQUESTS = 0.5
 MAX_RETRIES = 3
@@ -73,12 +74,13 @@ Return ONLY valid JSON with these exact keys:
 }
 """
 
-def get_reviews_to_classify():
+def get_reviews_to_classify(limit=None):
     """
     Fetch reviews from raw_reviews that need classification.
     - ALL non-play_store reviews
     - Random sample of PLAY_STORE_SAMPLE_SIZE play_store reviews
     - Exclude reviews already in tagged_reviews
+    - Optional hard cap on total reviews returned
     """
     supabase_url = os.getenv("SUPABASE_URL")
     supabase_key = os.getenv("SUPABASE_KEY")
@@ -112,8 +114,13 @@ def get_reviews_to_classify():
     
     # Combine
     all_reviews = non_play_store_reviews + play_store_reviews
+
+    # Apply optional hard cap
+    if limit and len(all_reviews) > limit:
+        all_reviews = random.sample(all_reviews, limit)
+
     print(f"Total reviews to classify: {len(all_reviews)}")
-    
+
     return all_reviews
 
 def classify_review(text, groq_client):
@@ -227,19 +234,23 @@ def upsert_tagged_review(review_id, classification, groq_client):
 
 def main():
     """Main execution function."""
+    parser = argparse.ArgumentParser(description="Classify Spotify reviews")
+    parser.add_argument("--limit", type=int, default=None, help="Maximum number of reviews to classify")
+    args = parser.parse_args()
+
     print("=" * 60)
     print("Phase 3: Classifier")
     print("=" * 60)
-    
+
     # Initialize Groq client
     groq_api_key = os.getenv("GROQ_API_KEY")
     if not groq_api_key:
         raise ValueError("GROQ_API_KEY must be set in .env file")
-    
+
     groq_client = Groq(api_key=groq_api_key)
-    
+
     # Get reviews to classify
-    reviews = get_reviews_to_classify()
+    reviews = get_reviews_to_classify(limit=args.limit)
     
     if not reviews:
         print("\n✗ No reviews to classify")
