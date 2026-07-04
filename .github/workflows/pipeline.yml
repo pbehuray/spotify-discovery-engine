@@ -54,7 +54,11 @@ jobs:
       - name: Classify unclassified reviews
         run: |
           echo "Starting classifier..."
-          python classify.py --limit 50
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            python classify.py --limit 50
+          else
+            python classify.py --limit 20
+          fi
           echo "Classifier completed."
 
       - name: Aggregate insights
