@@ -13,13 +13,29 @@ from dotenv import load_dotenv
 from groq import Groq
 from supabase import create_client
 
-from ingestion.play_store import (
-    scrape_play_store_reviews,
-    normalize_review,
-    upsert_reviews_to_supabase,
-)
-
 load_dotenv()
+
+
+# Lazy import ingestion.play_store to avoid import failures at app startup
+# on Streamlit Cloud if the scraper package has platform issues.
+_PLAY_STORE = None
+
+
+def _get_play_store():
+    global _PLAY_STORE
+    if _PLAY_STORE is None:
+        from ingestion.play_store import (
+            scrape_play_store_reviews,
+            normalize_review,
+            upsert_reviews_to_supabase,
+        )
+
+        _PLAY_STORE = {
+            "scrape_play_store_reviews": scrape_play_store_reviews,
+            "normalize_review": normalize_review,
+            "upsert_reviews_to_supabase": upsert_reviews_to_supabase,
+        }
+    return _PLAY_STORE
 
 
 def _get_secret(key):
@@ -219,6 +235,11 @@ def run_live_demo(n=5):
         Dict with review_text, rating, segment, frustration_type,
         discovery_related, sentiment
     """
+    play_store = _get_play_store()
+    scrape_play_store_reviews = play_store["scrape_play_store_reviews"]
+    normalize_review = play_store["normalize_review"]
+    upsert_reviews_to_supabase = play_store["upsert_reviews_to_supabase"]
+
     print("Starting live demo ingestion...")
 
     # Scrape only US for a fast demo, stop after 20 reviews so filtering leaves enough

@@ -6,7 +6,6 @@ Phase 5: Live demo dashboard
 import streamlit as st
 import plotly.express as px
 import pandas as pd
-from graphviz import Digraph
 
 from backend import run_live_demo, trigger_full_pipeline, load_insights, get_live_stats
 
@@ -440,6 +439,13 @@ with tab_insights:
 # ========================
 with tab_architecture:
     st.header("Architecture")
+
+    # Lazy import graphviz here to avoid startup import failures
+    try:
+        from graphviz import Digraph
+    except Exception as e:
+        st.error(f"Could not load graphviz: {e}")
+        st.stop()
 
     # --- Graphviz pipeline diagram ---
     dot = Digraph(
