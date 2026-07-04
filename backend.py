@@ -88,8 +88,10 @@ MAX_RETRIES = 3
 SLEEP_BETWEEN_REQUESTS = 0.5
 RETRY_BACKOFF = 2
 
-# Use a smaller/faster model for the live demo to stay under Groq rate limits
-GROQ_DEMO_MODEL = "llama-3.1-8b-instant"
+# Production classifier model (slower but more accurate)
+GROQ_MODEL = "llama-3.3-70b-versatile"
+# Fallback model used silently when the production model hits rate limits
+GROQ_FALLBACK_MODEL = "llama-3.1-8b-instant"
 
 
 def _get_groq_client():
@@ -109,23 +111,19 @@ def _get_supabase_client():
     return create_client(url, key)
 
 
-def classify_single_review(text):
+def _classify_with_model(text, model, groq_client):
     """
-    Classify a single raw review text using Groq.
-
-    Args:
-        text: Raw review text
+    Internal helper: classify a review with a specific Groq model.
 
     Returns:
-        Classification dict, or None if classification failed
+        (classification_dict, error_str) tuple
     """
-    groq_client = _get_groq_client()
     prompt = f"{TAXONOMY}\n\nReview text:\n{text}\n\nClassification:"
 
     for attempt in range(MAX_RETRIES):
         try:
             response = groq_client.chat.completions.create(
-                model=GROQ_DEMO_MODEL,
+                model=model,
                 messages=[
                     {
                         "role": "system",
@@ -145,27 +143,53 @@ def classify_single_review(text):
             result_text = re.sub(r"^```\s*", "", result_text)
             result_text = re.sub(r"\s*```$", "", result_text)
 
-            return json.loads(result_text)
+            return json.loads(result_text), None
 
         except Exception as e:
             error_str = str(e)
 
             if "rate_limit_exceeded" in error_str and "tokens" in error_str:
-                time_match = re.search(r"Please try again in (\d+m)?(\d+\.?\d*)s?", error_str)
-                if time_match:
-                    minutes = int(time_match.group(1)[:-1]) if time_match.group(1) else 0
-                    seconds = float(time_match.group(2))
-                    wait_time = minutes * 60 + seconds
-                    time.sleep(wait_time)
-                    continue
+                # Don't wait; signal caller to try fallback model
+                return None, error_str
 
             if "429" in error_str and attempt < MAX_RETRIES - 1:
                 time.sleep(RETRY_BACKOFF)
                 continue
 
-            print(f"Classification error: {e}")
-            return None
+            return None, error_str
 
+    return None, "max retries exceeded"
+
+
+def classify_single_review(text):
+    """
+    Classify a single raw review text using Groq.
+    Tries the production model first; silently falls back to a faster model
+    if Groq rate limits are hit.
+
+    Args:
+        text: Raw review text
+
+    Returns:
+        Classification dict, or None if classification failed
+    """
+    groq_client = _get_groq_client()
+
+    # Try production model first
+    result, error = _classify_with_model(text, GROQ_MODEL, groq_client)
+    if result is not None:
+        print(f"Classified with {GROQ_MODEL}")
+        return result
+
+    # If rate limited, silently fall back to the fast model
+    if error and "rate_limit_exceeded" in error:
+        print(f"Rate limit on {GROQ_MODEL}, falling back to {GROQ_FALLBACK_MODEL}")
+        result, _ = _classify_with_model(text, GROQ_FALLBACK_MODEL, groq_client)
+        if result is not None:
+            print(f"Classified with {GROQ_FALLBACK_MODEL}")
+        return result
+
+    print(f"Classification error: {error}")
     return None
 
 
