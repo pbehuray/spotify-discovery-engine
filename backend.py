@@ -275,6 +275,60 @@ def run_live_demo(n=5):
     print(f"Live demo complete")
 
 
+def get_live_stats():
+    """
+    Query Supabase for live pipeline stats after classification.
+
+    Returns:
+        Dict with total_reviews, discovery_related_count, top_segments,
+        latest_segment, and last_classified_at
+    """
+    supabase = _get_supabase_client()
+
+    # Total raw reviews ingested
+    total_resp = supabase.table("raw_reviews").select("id", count="exact").execute()
+    total_reviews = total_resp.count or 0
+
+    # Discovery-related classified reviews
+    discovery_resp = (
+        supabase.table("tagged_reviews")
+        .select("id", count="exact")
+        .eq("discovery_related", True)
+        .execute()
+    )
+    discovery_count = discovery_resp.count or 0
+
+    # Top 3 segments by count
+    segments_resp = supabase.table("tagged_reviews").select("segment").execute()
+    segment_counts = {}
+    for row in segments_resp.data:
+        seg = row.get("segment", "unknown")
+        segment_counts[seg] = segment_counts.get(seg, 0) + 1
+    top_segments = sorted(segment_counts.items(), key=lambda x: x[1], reverse=True)[:3]
+
+    # Most recent segment and classification timestamp
+    latest_resp = (
+        supabase.table("tagged_reviews")
+        .select("segment, classified_at")
+        .order("classified_at", desc=True)
+        .limit(1)
+        .execute()
+    )
+    latest_segment = None
+    last_classified_at = None
+    if latest_resp.data:
+        latest_segment = latest_resp.data[0].get("segment")
+        last_classified_at = latest_resp.data[0].get("classified_at")
+
+    return {
+        "total_reviews": total_reviews,
+        "discovery_related_count": discovery_count,
+        "top_segments": top_segments,
+        "latest_segment": latest_segment,
+        "last_classified_at": last_classified_at,
+    }
+
+
 def trigger_github_actions():
     """
     Trigger the GitHub Actions workflow_dispatch for pipeline.yml.
