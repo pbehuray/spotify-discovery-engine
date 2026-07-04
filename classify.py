@@ -7,7 +7,6 @@ import argparse
 import os
 import json
 import time
-import random
 import re
 from dotenv import load_dotenv
 from supabase import create_client, Client
@@ -77,51 +76,31 @@ Return ONLY valid JSON with these exact keys:
 def get_reviews_to_classify(limit=None):
     """
     Fetch reviews from raw_reviews that need classification.
-    - ALL non-play_store reviews
-    - Random sample of PLAY_STORE_SAMPLE_SIZE play_store reviews
-    - Exclude reviews already in tagged_reviews
-    - Optional hard cap on total reviews returned
+    - Uses a LEFT JOIN with tagged_reviews to find only unclassified rows
+    - Applies the limit directly in the Supabase query so the database
+      never returns more than `limit` rows
     """
     supabase_url = os.getenv("SUPABASE_URL")
     supabase_key = os.getenv("SUPABASE_KEY")
-    
+
     if not supabase_url or not supabase_key:
         raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in .env file")
-    
+
     supabase: Client = create_client(supabase_url, supabase_key)
-    
-    # Get IDs of already classified reviews
-    classified_response = supabase.table("tagged_reviews").select("id").execute()
-    classified_ids = {row['id'] for row in classified_response.data}
-    
-    print(f"Found {len(classified_ids)} already classified reviews")
-    
-    # Get all non-play_store reviews not yet classified
-    non_play_store_response = supabase.table("raw_reviews").select("*").neq("source", "play_store").execute()
-    non_play_store_reviews = [row for row in non_play_store_response.data if row['id'] not in classified_ids]
-    
-    print(f"Found {len(non_play_store_reviews)} non-play_store reviews to classify")
-    
-    # Get play_store reviews not yet classified
-    play_store_response = supabase.table("raw_reviews").select("*").eq("source", "play_store").execute()
-    play_store_reviews = [row for row in play_store_response.data if row['id'] not in classified_ids]
-    
-    # Random sample of play_store reviews
-    if len(play_store_reviews) > PLAY_STORE_SAMPLE_SIZE:
-        play_store_reviews = random.sample(play_store_reviews, PLAY_STORE_SAMPLE_SIZE)
-    
-    print(f"Sampling {len(play_store_reviews)} play_store reviews to classify")
-    
-    # Combine
-    all_reviews = non_play_store_reviews + play_store_reviews
 
-    # Apply optional hard cap
-    if limit and len(all_reviews) > limit:
-        all_reviews = random.sample(all_reviews, limit)
+    query_limit = limit or PLAY_STORE_SAMPLE_SIZE
+    response = (
+        supabase.from_("raw_reviews")
+        .select("*, tagged_reviews!left(id)")
+        .is_("tagged_reviews.id", "null")
+        .order("review_date", desc=True)
+        .limit(query_limit)
+        .execute()
+    )
+    unclassified = response.data
+    print(f"Fetched {len(unclassified)} unclassified reviews from Supabase (limit={query_limit})")
 
-    print(f"Total reviews to classify: {len(all_reviews)}")
-
-    return all_reviews
+    return unclassified
 
 def classify_review(text, groq_client):
     """
