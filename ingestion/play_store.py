@@ -3,6 +3,7 @@ Phase 2a: Play Store Ingestor
 Scrapes reviews from Google Play Store for com.spotify.music and upserts to Supabase.
 """
 
+import argparse
 import os
 import time
 from datetime import datetime, timedelta
@@ -195,14 +196,14 @@ def upsert_reviews_to_supabase(reviews):
     print(f"\n✓ Upsert complete: {success_count} successful, {failure_count} failed")
     return success_count, failure_count
 
-def main():
+def main(days=7):
     """Main execution function."""
     print("=" * 60)
     print("Phase 2a: Play Store Ingestor")
     print("=" * 60)
     
-    # Scrape reviews from last 7 days, multiple countries
-    raw_reviews = scrape_play_store_reviews(days=7, lang="en", countries=["us", "in", "gb", "ca", "au"])
+    # Scrape reviews from last N days, multiple countries
+    raw_reviews = scrape_play_store_reviews(days=days, lang="en", countries=["us", "in", "gb", "ca", "au"])
     
     if not raw_reviews:
         print("\n✗ No reviews scraped. Exiting.")
@@ -224,4 +225,7 @@ def main():
     print("=" * 60)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--days", type=int, default=7)
+    args = parser.parse_args()
+    main(days=args.days)

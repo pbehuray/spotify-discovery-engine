@@ -42,7 +42,7 @@ jobs:
       - name: Run Play Store scraper
         run: |
           echo "Starting Play Store scraper..."
-          python ingestion/play_store.py
+          python ingestion/play_store.py --days 7
           echo "Play Store scraper completed."
 
       - name: Run Paste importer
