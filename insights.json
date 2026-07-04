@@ -1,103 +1,111 @@
 {
-  "total_reviews": 456,
+  "total_reviews": 1000,
   "discovery_related": {
-    "count": 159,
-    "percent": 34.9
+    "count": 240,
+    "percent": 24.0
   },
   "by_frustration_type": {
-    "stale_recommendations": 65,
-    "control_loss": 37,
-    "discovery_friction": 21,
-    "none": 14,
-    "context_blindness": 8,
-    "filter_bubble_lock_in": 5,
-    "poor_new_release_surfacing": 5,
-    "over_personalization": 2,
-    "algorithmic_sameness": 2
+    "stale_recommendations": 81,
+    "control_loss": 54,
+    "none": 46,
+    "discovery_friction": 26,
+    "context_blindness": 16,
+    "poor_new_release_surfacing": 8,
+    "filter_bubble_lock_in": 4,
+    "algorithmic_sameness": 3,
+    "over_personalization": 2
   },
   "by_segment": {
-    "active_explorer": 113,
-    "unknown": 15,
-    "lapsed_explorer": 13,
-    "podcast_first": 8,
-    "genre_loyalist": 5,
-    "mood_listener": 5
+    "active_explorer": 166,
+    "unknown": 20,
+    "mood_listener": 19,
+    "lapsed_explorer": 16,
+    "podcast_first": 9,
+    "genre_loyalist": 8,
+    "passive_listener": 2
   },
   "by_desired_behavior": {
-    "find_new_artists": 88,
-    "break_routine": 31,
-    "none": 25,
-    "match_mood_or_context": 12,
-    "deep_dive_genre": 2,
+    "find_new_artists": 125,
+    "none": 41,
+    "break_routine": 40,
+    "match_mood_or_context": 30,
+    "deep_dive_genre": 3,
     "social_discovery": 1
   },
   "by_source": {
-    "play_store": 66,
-    "forum": 42,
+    "play_store": 149,
+    "forum": 40,
     "social": 32,
     "reddit": 17,
     "app_store": 2
   },
   "segment_x_frustration_crosstab": {
     "active_explorer": {
-      "stale_recommendations": 53,
-      "control_loss": 22,
-      "filter_bubble_lock_in": 4,
-      "discovery_friction": 15,
+      "stale_recommendations": 64,
+      "control_loss": 34,
+      "filter_bubble_lock_in": 3,
+      "discovery_friction": 20,
       "over_personalization": 2,
-      "poor_new_release_surfacing": 4,
       "algorithmic_sameness": 1,
-      "context_blindness": 4,
-      "none": 8
-    },
-    "unknown": {
-      "control_loss": 5,
-      "context_blindness": 2,
-      "stale_recommendations": 1,
-      "algorithmic_sameness": 1,
-      "discovery_friction": 4,
-      "none": 2
+      "poor_new_release_surfacing": 7,
+      "context_blindness": 7,
+      "none": 28
     },
     "podcast_first": {
-      "control_loss": 6,
+      "control_loss": 7,
       "context_blindness": 2
     },
+    "unknown": {
+      "control_loss": 6,
+      "context_blindness": 2,
+      "stale_recommendations": 3,
+      "algorithmic_sameness": 2,
+      "discovery_friction": 4,
+      "none": 3
+    },
     "lapsed_explorer": {
-      "stale_recommendations": 11,
-      "discovery_friction": 2
+      "stale_recommendations": 13,
+      "discovery_friction": 2,
+      "control_loss": 1
     },
     "genre_loyalist": {
-      "control_loss": 3,
+      "control_loss": 5,
       "filter_bubble_lock_in": 1,
-      "poor_new_release_surfacing": 1
+      "poor_new_release_surfacing": 1,
+      "none": 1
     },
     "mood_listener": {
-      "none": 4,
-      "control_loss": 1
+      "none": 13,
+      "control_loss": 1,
+      "context_blindness": 5
+    },
+    "passive_listener": {
+      "stale_recommendations": 1,
+      "none": 1
     }
   },
   "top_root_causes": {
+    "None": 31,
+    "Lack of control": 26,
     "Lack of variety": 20,
-    "Lack of control": 20,
-    "Poor algorithm": 9,
-    "None": 8,
-    "Lack of new music": 4,
+    "Poor algorithm": 12,
+    "Lack of context": 5,
+    "Lack of new music": 5,
+    "Poor shuffle": 4,
     "Lack of feedback": 3,
     "AI-generated songs": 3,
-    "Lack of diversity": 3,
-    "Lack of context": 3,
-    "Overly narrow": 2
+    "Shuffle not working": 3
   },
   "top_unmet_needs": {
-    "New music": 36,
-    "None": 9,
+    "New music": 38,
+    "None": 35,
     "Music variety": 6,
     "New music discovery": 6,
-    "Personalized music": 3,
-    "Control over playlists": 3,
-    "new music": 2,
-    "Personalized mix": 2,
-    "Authentic music": 2,
-    "Variety needed": 2
+    "Relevant music": 5,
+    "More control": 5,
+    "Personalized music": 4,
+    "Control over playlists": 4,
+    "Personalized mix": 3,
+    "True randomness": 3
   }
 }
