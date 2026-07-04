@@ -1,0 +1,77 @@
+name: Daily Spotify Discovery Pipeline
+
+on:
+  schedule:
+    # 10:00 AM IST = 04:30 UTC daily
+    - cron: '30 4 * * *'
+  workflow_dispatch:
+    inputs:
+      play_store_days:
+        description: 'Number of days to scrape from Play Store'
+        required: false
+        default: '90'
+        type: string
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    env:
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          echo "Installing Python dependencies..."
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          echo "Dependencies installed."
+
+      - name: Run Play Store scraper
+        run: |
+          echo "Starting Play Store scraper..."
+          python ingestion/play_store.py
+          echo "Play Store scraper completed."
+
+      - name: Run Paste importer
+        run: |
+          echo "Starting Paste importer..."
+          python ingestion/paste_importer.py
+          echo "Paste importer completed."
+
+      - name: Classify unclassified reviews
+        run: |
+          echo "Starting classifier..."
+          python classify.py
+          echo "Classifier completed."
+
+      - name: Aggregate insights
+        run: |
+          echo "Starting aggregation..."
+          python aggregate.py
+          echo "Aggregation completed."
+
+      - name: Commit updated insights
+        run: |
+          echo "Checking for updated insights files..."
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add insights.json insights.md
+          if git diff --cached --quiet; then
+            echo "No changes to insights files. Nothing to commit."
+          else
+            echo "Changes detected. Committing updated insights..."
+            git commit -m "Daily pipeline update: refresh insights from Play Store scrape and classification"
+            git push
+            echo "Insights committed and pushed."
+          fi

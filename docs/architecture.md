@@ -165,3 +165,62 @@ spotify-discovery/
 - Supabase uses new sb_secret_... format keys
 - No scraping behind login walls or violating ToS
 - Rate limiting on all external API calls
+
+## Phase 5: Streamlit Frontend Demo
+
+A lightweight web dashboard that demonstrates the pipeline in real time.
+
+### Tab 1: Live Ingestion
+- Scrape latest Play Store reviews on demand
+- Classify newly scraped reviews via Groq in real time
+- Display results as review cards with source, rating, taxonomy tags, and sentiment
+- Button to trigger full pipeline via GitHub Actions (`workflow_dispatch`)
+
+### Tab 2: Pipeline Insights
+- Load `insights.json` and render charts:
+  - Frustration types (bar chart)
+  - Segment distribution (pie/donut chart)
+  - Segment × frustration heatmap
+  - Source breakdown
+  - Top root causes (bar chart)
+  - Top unmet needs (bar chart)
+
+### Tab 3: Architecture
+- Graphviz flow diagram showing the full pipeline
+- Links to GitHub repo and live prototype
+
+### Design
+- Dark theme
+- Spotify green (`#1DB954`) accent color
+
+## Phase 6: GitHub Actions Scheduler
+
+Automated daily refresh that runs the entire pipeline in CI/CD.
+
+### Schedule
+- Cron: `30 4 * * *` (10:00 AM IST = 04:30 UTC daily)
+- `workflow_dispatch` enabled for manual testing
+
+### Workflow Steps
+1. Checkout repository
+2. Set up Python
+3. Install dependencies
+4. Set secrets as environment variables
+   - `GROQ_API_KEY`
+   - `SUPABASE_URL`
+   - `SUPABASE_KEY`
+5. Run Play Store scraper
+6. Run classifier
+7. Run aggregator
+8. Commit updated `insights.json` and `insights.md` back to the repo
+
+### Logging
+- Each step prints start/end status and key counts
+- Scraper logs reviews fetched
+- Classifier logs how many reviews were classified and any failures
+- Aggregator logs total classified and discovery-related counts
+
+### Security
+- Secrets stored as GitHub repository secrets
+- No secrets logged to output
+- `insights.json` and `insights.md` are committed so results are visible without re-running the pipeline
