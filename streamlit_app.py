@@ -136,10 +136,12 @@ with tab_live:
             cards_container = st.empty()
             results = []
 
-            status.info("Scraping the 5 most recent Play Store reviews...")
-
             try:
-                for i, review in enumerate(run_live_demo(n=5), start=1):
+                with st.spinner("Scraping the 5 most recent US Play Store reviews (takes ~10–20s)..."):
+                    status.info("Scraping...")
+                    review_generator = run_live_demo(n=5)
+
+                for i, review in enumerate(review_generator, start=1):
                     progress = int((i / 5) * 100)
                     progress_bar.progress(progress)
                     status.info(f"Classifying review {i} of 5...")
