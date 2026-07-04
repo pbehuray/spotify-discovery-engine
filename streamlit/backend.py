@@ -176,56 +176,81 @@ def run_live_ingestion(n=10):
         List of dicts with review_text, rating, segment, frustration_type,
         discovery_related, sentiment
     """
-    print("Starting live ingestion...")
+    return list(run_live_demo(n=n))
+
+
+def run_live_demo(n=5):
+    """
+    Generator that scrapes the most recent Play Store reviews and classifies
+    them one by one, yielding a result dict after each successful classification.
+
+    Args:
+        n: Maximum number of most recent reviews to classify
+
+    Yields:
+        Dict with review_text, rating, segment, frustration_type,
+        discovery_related, sentiment
+    """
+    print("Starting live demo ingestion...")
 
     raw_reviews = scrape_play_store_reviews(app_id="com.spotify.music", days=7)
     if not raw_reviews:
         print("No reviews scraped.")
-        return []
+        return
 
+    # Sort by review date descending and take the n most recent
+    raw_reviews = sorted(raw_reviews, key=lambda r: r["at"], reverse=True)[:n]
     normalized = [normalize_review(r) for r in raw_reviews]
-    print(f"Normalized {len(normalized)} reviews")
+    print(f"Normalized {len(normalized)} most recent reviews")
 
-    upsert_reviews_to_supabase(normalized)
+    # Optionally upsert raw reviews to Supabase
+    try:
+        upsert_reviews_to_supabase(normalized)
+    except Exception as e:
+        print(f"Upsert raw reviews failed: {e}")
 
-    results = []
-    for review in normalized[:n]:
+    for review in normalized:
         classification = classify_single_review(review["text"])
         if not classification:
             continue
 
-        supabase = _get_supabase_client()
-        tagged = {
-            "id": review["id"],
-            "frustration_type": classification.get("frustration_type"),
-            "segment": classification.get("segment"),
-            "desired_behavior": classification.get("desired_behavior"),
-            "root_cause": classification.get("root_cause"),
-            "unmet_need": classification.get("unmet_need"),
-            "discovery_related": classification.get("discovery_related"),
-            "sentiment": classification.get("sentiment"),
-        }
+        # Upsert classified tag to Supabase
         try:
-            supabase.table("tagged_reviews").upsert(tagged, on_conflict="id").execute()
-        except Exception as e:
-            print(f"Upsert tagged review failed: {e}")
-            continue
-
-        results.append(
-            {
-                "review_text": review["text"],
-                "rating": review["rating"],
-                "segment": classification.get("segment"),
+            supabase = _get_supabase_client()
+            tagged = {
+                "id": review["id"],
                 "frustration_type": classification.get("frustration_type"),
+                "segment": classification.get("segment"),
+                "desired_behavior": classification.get("desired_behavior"),
+                "root_cause": classification.get("root_cause"),
+                "unmet_need": classification.get("unmet_need"),
                 "discovery_related": classification.get("discovery_related"),
                 "sentiment": classification.get("sentiment"),
             }
-        )
+            supabase.table("tagged_reviews").upsert(tagged, on_conflict="id").execute()
+        except Exception as e:
+            print(f"Upsert tagged review failed: {e}")
+
+        yield {
+            "review_text": review["text"],
+            "rating": review["rating"],
+            "segment": classification.get("segment"),
+            "frustration_type": classification.get("frustration_type"),
+            "discovery_related": classification.get("discovery_related"),
+            "sentiment": classification.get("sentiment"),
+        }
 
         time.sleep(SLEEP_BETWEEN_REQUESTS)
 
-    print(f"Live ingestion complete: {len(results)} reviews classified")
-    return results
+    print(f"Live demo complete")
+
+
+def trigger_full_pipeline():
+    """
+    Trigger the GitHub Actions workflow_dispatch for pipeline.yml.
+    Alias for trigger_github_actions().
+    """
+    return trigger_github_actions()
 
 
 def load_insights():
