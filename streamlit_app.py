@@ -447,16 +447,14 @@ with tab_architecture:
     st.subheader("Links")
     link_col1, link_col2 = st.columns(2)
     with link_col1:
-        st.markdown(
-            "<a href='https://github.com/pbehuray/spotify-discovery-engine' target='_blank'>"
-            "<button style='background-color:#1DB954;color:#fff;border:none;border-radius:500px;"
-            "padding:0.75rem 2rem;font-weight:700;width:100%;'>🗂️ GitHub Repo</button></a>",
-            unsafe_allow_html=True,
+        st.link_button(
+            "View Pipeline on GitHub",
+            "https://github.com/pbehuray/spotify-discovery-engine",
+            width="stretch",
         )
     with link_col2:
-        st.markdown(
-            "<a href='https://github.com/pbehuray/spotify-discovery-engine' target='_blank'>"
-            "<button style='background-color:#1DB954;color:#fff;border:none;border-radius:500px;"
-            "padding:0.75rem 2rem;font-weight:700;width:100%;'>🚀 Prototype</button></a>",
-            unsafe_allow_html=True,
+        st.link_button(
+            "View Prototype",
+            "https://discovery-dial-mu.vercel.app",
+            width="stretch",
         )
