@@ -1,9 +1,9 @@
-supabase
-python-dotenv==1.0.0
-groq==1.4.0
-google-play-scraper==1.2.2
-requests==2.31.0
-beautifulsoup4==4.12.3
-streamlit
-plotly
+streamlit>=1.35.0
+google-play-scraper>=1.2.7
+groq>=0.9.0
+supabase>=2.4.0
+pandas>=2.0.0
+plotly>=5.18.0
+python-dotenv>=1.0.0
+requests>=2.31.0
 graphviz
