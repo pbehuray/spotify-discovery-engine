@@ -6,7 +6,7 @@ Scrapes reviews from Google Play Store for com.spotify.music and upserts to Supa
 import argparse
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 from supabase import create_client, Client
 from google_play_scraper import Sort, reviews
@@ -30,7 +30,7 @@ def scrape_play_store_reviews(app_id="com.spotify.music", days=7, lang="en", cou
     Returns:
         List of review dictionaries (raw from google_play-scraper)
     """
-    cutoff_date = datetime.now() - timedelta(days=days)
+    cutoff_date = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=days)
     all_reviews = []
     seen_ids = set()  # Avoid duplicates across countries (unique by review ID)
     
@@ -61,10 +61,12 @@ def scrape_play_store_reviews(app_id="com.spotify.music", days=7, lang="en", cou
                 
                 page_count += 1
                 
-                # Filter reviews by date and deduplicate across countries
+                # Filter reviews by date and deduplicate across countries.
+                # Reviews are sorted newest-first, so the first old review means we can stop.
                 batch_filtered = []
                 duplicate_count = 0
                 old_review_count = 0
+                hit_cutoff = False
                 for review in result:
                     review_id = str(review["reviewId"])
                     review_date = review["at"]
@@ -75,15 +77,15 @@ def scrape_play_store_reviews(app_id="com.spotify.music", days=7, lang="en", cou
                     if latest_date is None or review_date > latest_date:
                         latest_date = review_date
                     
+                    # Check if review is within date window first
+                    if review_date < cutoff_date:
+                        old_review_count += 1
+                        hit_cutoff = True
+                        break
+                    
                     # Skip if we've already seen this review (cross-country dedup)
                     if review_id in seen_ids:
                         duplicate_count += 1
-                        continue
-                    
-                    # Check if review is within date window
-                    if review_date < cutoff_date:
-                        old_review_count += 1
-                        # Don't break - continue processing the rest of the batch
                         continue
                     
                     seen_ids.add(review_id)
@@ -107,8 +109,8 @@ def scrape_play_store_reviews(app_id="com.spotify.music", days=7, lang="en", cou
                     print(f"  No more reviews available for {country.upper()}")
                     break
                 
-                # Stop if this batch had no new reviews (we've paged past the cutoff)
-                if len(batch_filtered) == 0:
+                # Stop if we hit the date cutoff in this batch (reviews are newest-first)
+                if hit_cutoff or len(batch_filtered) == 0:
                     print(f"  No more reviews within {days}-day window for {country.upper()}")
                     break
                 
@@ -116,21 +118,21 @@ def scrape_play_store_reviews(app_id="com.spotify.music", days=7, lang="en", cou
                 time.sleep(0.5)
                 
             except Exception as e:
-                print(f"  ✗ Error scraping batch for {country.upper()}: {e}")
+                print(f"  ERROR scraping batch for {country.upper()}: {e}")
                 break
         
         # Log summary for this country
         date_range_str = ""
         if earliest_date and latest_date:
             date_range_str = f" (date range: {earliest_date.isoformat()} to {latest_date.isoformat()})"
-        print(f"✓ Completed {country.upper()}: {len(country_reviews)} reviews across {page_count} pages{date_range_str}")
+        print(f"OK Completed {country.upper()}: {len(country_reviews)} reviews across {page_count} pages{date_range_str}")
 
         # Stop moving to next country if we already have enough reviews
         if max_reviews and len(all_reviews) >= max_reviews:
             break
     
-    print(f"\n✓ Total unique reviews across all countries: {len(all_reviews)}")
-    print(f"✓ Reviews within {days}-day window: {len(all_reviews)}")
+    print(f"\nOK Total unique reviews across all countries: {len(all_reviews)}")
+    print(f"OK Reviews within {days}-day window: {len(all_reviews)}")
     
     return all_reviews
 
@@ -191,9 +193,9 @@ def upsert_reviews_to_supabase(reviews):
             
         except Exception as e:
             failure_count += 1
-            print(f"  ✗ Failed to upsert review {review['id']}: {e}")
+            print(f"  ERROR Failed to upsert review {review['id']}: {e}")
     
-    print(f"\n✓ Upsert complete: {success_count} successful, {failure_count} failed")
+    print(f"\nOK Upsert complete: {success_count} successful, {failure_count} failed")
     return success_count, failure_count
 
 def main(days=7):
@@ -206,13 +208,13 @@ def main(days=7):
     raw_reviews = scrape_play_store_reviews(days=days, lang="en", countries=["us", "in", "gb", "ca", "au"])
     
     if not raw_reviews:
-        print("\n✗ No reviews scraped. Exiting.")
+        print("\nERROR No reviews scraped. Exiting.")
         return
     
     # Normalize reviews
     print("\nNormalizing reviews to raw_reviews schema...")
     normalized_reviews = [normalize_review(review) for review in raw_reviews]
-    print(f"✓ Normalized {len(normalized_reviews)} reviews")
+    print(f"OK Normalized {len(normalized_reviews)} reviews")
     
     # Upsert to Supabase
     success_count, failure_count = upsert_reviews_to_supabase(normalized_reviews)
