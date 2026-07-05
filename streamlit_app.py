@@ -285,10 +285,12 @@ with tab_live:
             status_data = {"run_status": "unknown", "active_stage": 0,
                            "stages": [{"name": n, "state": "pending"}
                                        for n in ["Ingestion","Classification","Aggregation","Insights Ready"]]}
+            st.caption(f"⚠ API error: {ex}")
 
         st.markdown(render_stages(status_data["stages"]), unsafe_allow_html=True)
         run_status = status_data["run_status"]
         poll_count = st.session_state.get("pipeline_poll_count", 0)
+        st.caption(f"Poll #{poll_count} — run_status: `{run_status}` | active_stage: `{status_data.get('active_stage')}` | run_id: `{st.session_state.get('pipeline_run_id')}`")
 
         if run_status in ("completed", "success"):
             st.session_state["pipeline_polling"] = False
