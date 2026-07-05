@@ -6,21 +6,21 @@
   },
   "by_frustration_type": {
     "stale_recommendations": 80,
-    "control_loss": 55,
+    "control_loss": 53,
     "none": 47,
-    "discovery_friction": 27,
+    "discovery_friction": 28,
     "context_blindness": 16,
     "poor_new_release_surfacing": 7,
-    "filter_bubble_lock_in": 4,
+    "filter_bubble_lock_in": 5,
     "algorithmic_sameness": 4,
     "over_personalization": 1
   },
   "by_segment": {
     "active_explorer": 167,
-    "unknown": 21,
+    "unknown": 22,
     "mood_listener": 19,
     "lapsed_explorer": 15,
-    "podcast_first": 9,
+    "podcast_first": 8,
     "genre_loyalist": 8,
     "passive_listener": 2
   },
@@ -42,9 +42,9 @@
   "segment_x_frustration_crosstab": {
     "active_explorer": {
       "stale_recommendations": 64,
-      "control_loss": 34,
+      "control_loss": 33,
       "filter_bubble_lock_in": 3,
-      "discovery_friction": 21,
+      "discovery_friction": 22,
       "algorithmic_sameness": 2,
       "none": 29,
       "poor_new_release_surfacing": 6,
@@ -52,11 +52,12 @@
       "over_personalization": 1
     },
     "podcast_first": {
-      "control_loss": 7,
-      "context_blindness": 2
+      "context_blindness": 2,
+      "control_loss": 6
     },
     "unknown": {
       "control_loss": 7,
+      "filter_bubble_lock_in": 1,
       "context_blindness": 2,
       "stale_recommendations": 3,
       "algorithmic_sameness": 2,
@@ -86,7 +87,7 @@
   },
   "top_root_causes": {
     "None": 31,
-    "Lack of control": 27,
+    "Lack of control": 25,
     "Lack of variety": 16,
     "Poor algorithm": 12,
     "Lack of context": 5,
@@ -98,7 +99,7 @@
   },
   "top_unmet_needs": {
     "None": 36,
-    "New music": 34,
+    "New music": 33,
     "Music variety": 6,
     "New music discovery": 6,
     "Relevant music": 5,
