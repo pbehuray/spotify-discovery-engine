@@ -216,6 +216,8 @@ with tab_live:
                     "Full pipeline stats from the research dataset (456 curated reviews) are shown in Tab 4. "
                     "The GitHub Actions scheduler continues to ingest and classify new reviews daily."
                 )
+                st.session_state["live_demo_just_completed"] = True
+                st.rerun()
 
             except Exception as e:
                 progress_bar.empty()
@@ -279,6 +281,7 @@ with tab_live:
 
             import time as _time
             MAX_POLLS = 60   # 60 × 8s = 8 minutes max
+            pipeline_done = False
             for _ in range(MAX_POLLS):
                 try:
                     status_data = get_pipeline_step_status()
@@ -294,20 +297,36 @@ with tab_live:
                 if run_status in ("completed", "success"):
                     dispatch_status.empty()
                     finish_banner.success("Pipeline complete! Fresh insights are ready.")
-
-                    def _go_to_pipeline_tab():
-                        st.session_state["goto_tab"] = 1
-
-                    st.button(
-                        "View Pipeline Insights →",
-                        on_click=_go_to_pipeline_tab,
-                    )
+                    pipeline_done = True
                     break
                 elif run_status in ("failure", "cancelled", "timed_out"):
                     dispatch_status.error(f"Pipeline ended with status: {run_status}")
                     break
 
                 _time.sleep(8)
+
+            if pipeline_done:
+                st.session_state["pipeline_just_completed"] = True
+                st.rerun()
+
+
+# --- Persistent View Pipeline Insights button (survives reruns) ---
+if st.session_state.get("pipeline_just_completed") or st.session_state.get("live_demo_just_completed"):
+    if st.session_state.get("pipeline_just_completed"):
+        st.success("Pipeline complete! Fresh insights are ready.")
+    else:
+        st.success("✓ Classification complete — pipeline insights updated.")
+
+    def _go_to_pipeline_tab():
+        st.session_state["goto_tab"] = 1
+        st.session_state["pipeline_just_completed"] = False
+        st.session_state["live_demo_just_completed"] = False
+
+    st.button(
+        "View Pipeline Insights →",
+        on_click=_go_to_pipeline_tab,
+        key="persistent_pipeline_insights_btn",
+    )
 
 
 RESEARCH_FINDINGS = {
