@@ -142,8 +142,8 @@ def render_review_cards(reviews):
 
 
 # --- Tabs ---
-tab_live, tab_research, tab_pipeline, tab_architecture = st.tabs(
-    ["Live Demo", "Research Insights", "Pipeline Insights", "Architecture"]
+tab_live, tab_pipeline, tab_architecture, tab_research = st.tabs(
+    ["Live Demo", "Pipeline Insights", "Architecture", "Research Insights"]
 )
 
 # ========================
