@@ -4,6 +4,7 @@ Phase 5: Live demo dashboard
 """
 
 import streamlit as st
+import streamlit.components.v1 as components
 import plotly.express as px
 import pandas as pd
 
@@ -109,6 +110,30 @@ st.markdown(
 # --- Header ---
 st.title("🎧 Spotify Discovery Engine")
 st.caption("Live demo of the discovery-frustration classifier")
+
+# --- Programmatic tab navigation via JS ---
+if st.session_state.get("goto_tab") is not None:
+    tab_index = st.session_state.pop("goto_tab")
+    components.html(
+        f"""
+        <script>
+        (function() {{
+            var tries = 0;
+            function clickTab() {{
+                var tabs = window.parent.document.querySelectorAll('[data-baseweb="tab"]');
+                if (tabs.length > {tab_index}) {{
+                    tabs[{tab_index}].click();
+                }} else if (tries < 20) {{
+                    tries++;
+                    setTimeout(clickTab, 100);
+                }}
+            }}
+            setTimeout(clickTab, 200);
+        }})();
+        </script>
+        """,
+        height=0,
+    )
 
 
 # --- Helper: render review cards ---
@@ -266,9 +291,13 @@ with tab_live:
                 if run_status in ("completed", "success"):
                     dispatch_status.empty()
                     finish_banner.success("Pipeline complete! Fresh insights are ready.")
+
+                    def _go_to_pipeline_tab():
+                        st.session_state["goto_tab"] = 1
+
                     st.button(
                         "View Pipeline Insights →",
-                        on_click=lambda: st.session_state.update({"active_tab": 2}),
+                        on_click=_go_to_pipeline_tab,
                     )
                     break
                 elif run_status in ("failure", "cancelled", "timed_out"):
