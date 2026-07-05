@@ -574,14 +574,14 @@ def get_pipeline_step_status(run_id=None):
                     return True
             return False
 
-        # Map steps → stages
-        ingestion_done = step_done("play store scraper completed") or step_done("paste importer completed")
-        classification_done = step_done("classifier completed") or step_done("classification completed")
-        aggregation_done = step_done("aggregation completed") or step_done("aggregate") and step_done("insights")
+        # Map steps → stages (matches actual step names in pipeline.yml)
+        ingestion_done = step_done("run play store scraper") or step_done("run paste importer")
+        classification_done = step_done("classify unclassified reviews")
+        aggregation_done = step_done("aggregate insights") or step_done("commit updated insights")
 
-        ingestion_active = step_running("play store scraper") or step_running("paste importer")
-        classification_active = step_running("classifier") or step_running("classify")
-        aggregation_active = step_running("aggregat") or step_running("insights")
+        ingestion_active = step_running("run play store scraper") or step_running("run paste importer")
+        classification_active = step_running("classify unclassified reviews")
+        aggregation_active = step_running("aggregate insights") or step_running("commit updated insights")
 
         if run_status == "completed" and run_conclusion == "success":
             stages = [{"name": n, "state": "complete"} for n in stage_names]
