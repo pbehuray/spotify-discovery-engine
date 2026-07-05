@@ -7,7 +7,7 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 
-from backend import run_live_demo, trigger_full_pipeline, get_pipeline_step_status
+from backend import run_live_demo, trigger_full_pipeline, get_pipeline_step_status, load_insights
 
 # --- Page config ---
 st.set_page_config(
@@ -142,8 +142,8 @@ def render_review_cards(reviews):
 
 
 # --- Tabs ---
-tab_live, tab_insights, tab_architecture = st.tabs(
-    ["Live Demo", "Pipeline Insights", "Architecture"]
+tab_live, tab_research, tab_pipeline, tab_architecture = st.tabs(
+    ["Live Demo", "Research Insights", "Pipeline Insights", "Architecture"]
 )
 
 # ========================
@@ -268,7 +268,7 @@ with tab_live:
                     finish_banner.success("Pipeline complete! Fresh insights are ready.")
                     st.button(
                         "View Pipeline Insights →",
-                        on_click=lambda: st.session_state.update({"active_tab": 1}),
+                        on_click=lambda: st.session_state.update({"active_tab": 2}),
                     )
                     break
                 elif run_status in ("failure", "cancelled", "timed_out"):
@@ -295,13 +295,12 @@ RESEARCH_FINDINGS = {
 }
 
 # ========================
-# Tab 2: Pipeline Insights
+# Tab 2: Research Insights
 # ========================
-with tab_insights:
-    st.header("Pipeline Insights")
+with tab_research:
+    st.header("Research Insights")
     st.caption(
-        "Research findings from the curated June 2026 pipeline run: 456 reviews across Play Store, App Store, Reddit, forums, and social. "
-        "Pipeline continues ingesting daily — live demo in Tab 1."
+        "Initial research dataset — 456 reviews collected June 2026. These findings drove the Discovery Dial concept."
     )
 
     r = RESEARCH_FINDINGS
@@ -476,7 +475,137 @@ with tab_insights:
 
 
 # ========================
-# Tab 3: Architecture
+# Tab 3: Pipeline Insights (live)
+# ========================
+with tab_pipeline:
+    st.header("Pipeline Insights")
+    st.caption(
+        "Live pipeline data — updates daily via GitHub Actions scheduler. "
+        "Total includes all reviews classified since June 2026."
+    )
+
+    try:
+        insights = load_insights()
+    except Exception as e:
+        st.warning(f"Could not load insights.json: {e}")
+        insights = {}
+
+    if insights:
+        # Last updated
+        last_updated = insights.get("generated_at") or insights.get("last_updated")
+        if last_updated:
+            st.caption(f"Last updated: {last_updated}")
+
+        total_pi = insights.get("total_reviews", 0)
+        disc_pi = insights.get("discovery_related", {})
+        disc_count_pi = disc_pi.get("count", 0)
+        disc_pct_pi = disc_pi.get("percent", 0)
+
+        by_seg_pi = insights.get("by_segment", {})
+        dom_seg_pi = max(by_seg_pi, key=by_seg_pi.get) if by_seg_pi else "N/A"
+        dom_seg_cnt_pi = by_seg_pi.get(dom_seg_pi, 0)
+
+        by_frust_pi = insights.get("by_frustration_type", {})
+        top_frust_pi = max(by_frust_pi, key=by_frust_pi.get) if by_frust_pi else "N/A"
+        top_frust_cnt_pi = by_frust_pi.get(top_frust_pi, 0)
+
+        pi_c1, pi_c2, pi_c3, pi_c4 = st.columns(4)
+        pi_c1.metric("Total Reviews", str(total_pi))
+        pi_c2.metric("Discovery-related", str(disc_count_pi), f"{disc_pct_pi}%")
+        pi_c3.metric("Dominant Segment", dom_seg_pi, str(dom_seg_cnt_pi))
+        pi_c4.metric("Top Frustration", top_frust_pi, str(top_frust_cnt_pi))
+
+        st.divider()
+
+        pi_col_a, pi_col_b = st.columns(2)
+
+        with pi_col_a:
+            st.subheader("Frustration Types")
+            if by_frust_pi:
+                df_pi_frust = pd.DataFrame(
+                    {"Frustration Type": list(by_frust_pi.keys()), "Count": list(by_frust_pi.values())}
+                ).sort_values("Count", ascending=True)
+                fig = px.bar(df_pi_frust, x="Count", y="Frustration Type", orientation="h",
+                             color="Count", color_continuous_scale=["#181818", SPOTIFY_GREEN],
+                             template="plotly_dark")
+                fig.update_layout(paper_bgcolor=DARK_BG, plot_bgcolor=DARK_BG,
+                                  font_color="#ffffff", margin=dict(l=20, r=20, t=20, b=20))
+                st.plotly_chart(fig, use_container_width=True)
+
+        with pi_col_b:
+            st.subheader("Segment Distribution")
+            if by_seg_pi:
+                df_pi_seg = pd.DataFrame(
+                    {"Segment": list(by_seg_pi.keys()), "Count": list(by_seg_pi.values())}
+                ).sort_values("Count", ascending=False)
+                fig = px.bar(df_pi_seg, x="Segment", y="Count",
+                             color="Count", color_continuous_scale=["#181818", SPOTIFY_GREEN],
+                             template="plotly_dark")
+                fig.update_layout(paper_bgcolor=DARK_BG, plot_bgcolor=DARK_BG,
+                                  font_color="#ffffff", margin=dict(l=20, r=20, t=20, b=20))
+                st.plotly_chart(fig, use_container_width=True)
+
+        crosstab_pi = insights.get("segment_x_frustration_crosstab", {})
+        if crosstab_pi:
+            st.subheader("Segment × Frustration Crosstab")
+            pi_segs = list(crosstab_pi.keys())
+            pi_frusts = sorted(set(f for sv in crosstab_pi.values() for f in sv.keys()))
+            df_pi_heat = pd.DataFrame(
+                {seg: [crosstab_pi[seg].get(f, 0) for f in pi_frusts] for seg in pi_segs},
+                index=pi_frusts,
+            ).T
+            fig = px.imshow(df_pi_heat, color_continuous_scale=["#181818", SPOTIFY_GREEN],
+                            template="plotly_dark", aspect="auto", text_auto=True)
+            fig.update_layout(paper_bgcolor=DARK_BG, plot_bgcolor=DARK_BG,
+                              font_color="#ffffff", xaxis_title="Frustration Type", yaxis_title="Segment")
+            st.plotly_chart(fig, use_container_width=True)
+
+        pi_col_c, pi_col_d = st.columns(2)
+
+        with pi_col_c:
+            st.subheader("Top Root Causes")
+            root_pi = insights.get("top_root_causes", {})
+            if root_pi:
+                df_pi_root = pd.DataFrame(
+                    {"Root Cause": list(root_pi.keys())[:10], "Count": list(root_pi.values())[:10]}
+                )
+                fig = px.bar(df_pi_root, x="Count", y="Root Cause", orientation="h",
+                             color="Count", color_continuous_scale=["#181818", SPOTIFY_GREEN],
+                             template="plotly_dark")
+                fig.update_layout(paper_bgcolor=DARK_BG, plot_bgcolor=DARK_BG,
+                                  font_color="#ffffff", margin=dict(l=20, r=20, t=20, b=20))
+                st.plotly_chart(fig, use_container_width=True)
+
+        with pi_col_d:
+            st.subheader("Top Unmet Needs")
+            needs_pi = insights.get("top_unmet_needs", {})
+            if needs_pi:
+                df_pi_needs = pd.DataFrame(
+                    {"Unmet Need": list(needs_pi.keys())[:10], "Count": list(needs_pi.values())[:10]}
+                )
+                fig = px.bar(df_pi_needs, x="Count", y="Unmet Need", orientation="h",
+                             color="Count", color_continuous_scale=["#181818", SPOTIFY_GREEN],
+                             template="plotly_dark")
+                fig.update_layout(paper_bgcolor=DARK_BG, plot_bgcolor=DARK_BG,
+                                  font_color="#ffffff", margin=dict(l=20, r=20, t=20, b=20))
+                st.plotly_chart(fig, use_container_width=True)
+
+        by_src_pi = insights.get("by_source", {})
+        if by_src_pi:
+            st.subheader("Review Source Breakdown")
+            df_pi_src = pd.DataFrame({"Source": list(by_src_pi.keys()), "Count": list(by_src_pi.values())})
+            fig = px.pie(df_pi_src, names="Source", values="Count",
+                         color_discrete_sequence=["#1DB954", "#1ed760", "#2a2a2a", "#333333", "#444444"],
+                         template="plotly_dark")
+            fig.update_layout(paper_bgcolor=DARK_BG, plot_bgcolor=DARK_BG,
+                              font_color="#ffffff", margin=dict(l=20, r=20, t=20, b=20))
+            st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("No insights data available yet. Run the pipeline to generate insights.")
+
+
+# ========================
+# Tab 4: Architecture
 # ========================
 with tab_architecture:
     st.header("Architecture")
