@@ -449,3 +449,135 @@ def get_pipeline_run_status():
     except Exception as e:
         print(f"Failed to get pipeline status: {e}")
         return "unknown"
+
+
+def get_pipeline_step_status():
+    """
+    Get the active pipeline stage by inspecting GitHub Actions job steps.
+
+    Returns a dict:
+      {
+        "run_status": "queued" | "in_progress" | "completed" | "failed" | "unknown",
+        "active_stage": 0-4,   # 0=pending/queued, 1=ingestion, 2=classification,
+                                # 3=aggregation, 4=complete
+        "stages": [            # list of 4 stage dicts
+          {"name": str, "state": "pending" | "active" | "complete"}
+        ]
+      }
+    """
+    token = _get_secret("GITHUB_TOKEN")
+    repo = _parse_repo()
+
+    stage_names = ["Ingestion", "Classification", "Aggregation", "Insights Ready"]
+    pending_stages = [{"name": n, "state": "pending"} for n in stage_names]
+
+    if not token:
+        return {"run_status": "unknown", "active_stage": 0, "stages": pending_stages}
+
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+
+    try:
+        # 1. Get latest run
+        runs_url = f"https://api.github.com/repos/{repo}/actions/workflows/pipeline.yml/runs?per_page=1"
+        runs_resp = requests.get(runs_url, headers=headers, timeout=30)
+        runs_resp.raise_for_status()
+        runs = runs_resp.json().get("workflow_runs", [])
+        if not runs:
+            return {"run_status": "unknown", "active_stage": 0, "stages": pending_stages}
+
+        latest = runs[0]
+        run_status = latest.get("status", "unknown")
+        run_conclusion = latest.get("conclusion")
+        run_id = latest.get("id")
+
+        if run_status == "queued":
+            return {"run_status": "queued", "active_stage": 0, "stages": pending_stages}
+
+        if run_status == "completed" and run_conclusion != "success":
+            stages = [{"name": n, "state": "complete"} for n in stage_names]
+            return {"run_status": run_conclusion or "completed", "active_stage": 4, "stages": stages}
+
+        # 2. Get job steps
+        jobs_url = f"https://api.github.com/repos/{repo}/actions/runs/{run_id}/jobs"
+        jobs_resp = requests.get(jobs_url, headers=headers, timeout=30)
+        jobs_resp.raise_for_status()
+        jobs = jobs_resp.json().get("jobs", [])
+
+        step_names = []
+        for job in jobs:
+            for step in job.get("steps", []):
+                step_names.append((step.get("name", ""), step.get("status", ""), step.get("conclusion", "")))
+
+        def step_done(keyword):
+            for name, status, conclusion in step_names:
+                if keyword.lower() in name.lower() and status == "completed":
+                    return True
+            return False
+
+        def step_running(keyword):
+            for name, status, conclusion in step_names:
+                if keyword.lower() in name.lower() and status == "in_progress":
+                    return True
+            return False
+
+        # Map steps → stages
+        ingestion_done = step_done("play store scraper completed") or step_done("paste importer completed")
+        classification_done = step_done("classifier completed") or step_done("classification completed")
+        aggregation_done = step_done("aggregation completed") or step_done("aggregate") and step_done("insights")
+
+        ingestion_active = step_running("play store scraper") or step_running("paste importer")
+        classification_active = step_running("classifier") or step_running("classify")
+        aggregation_active = step_running("aggregat") or step_running("insights")
+
+        if run_status == "completed" and run_conclusion == "success":
+            stages = [{"name": n, "state": "complete"} for n in stage_names]
+            return {"run_status": "completed", "active_stage": 4, "stages": stages}
+
+        # Build stage states
+        stages = []
+        active_stage = 1
+
+        if ingestion_done:
+            stages.append({"name": "Ingestion", "state": "complete"})
+            active_stage = 2
+        elif ingestion_active:
+            stages.append({"name": "Ingestion", "state": "active"})
+            active_stage = 1
+        else:
+            stages.append({"name": "Ingestion", "state": "active"})
+            active_stage = 1
+
+        if classification_done:
+            stages.append({"name": "Classification", "state": "complete"})
+            active_stage = 3
+        elif classification_active or (ingestion_done and not classification_done):
+            stages.append({"name": "Classification", "state": "active" if ingestion_done else "pending"})
+            if ingestion_done:
+                active_stage = 2
+        else:
+            stages.append({"name": "Classification", "state": "pending"})
+
+        if aggregation_done:
+            stages.append({"name": "Aggregation", "state": "complete"})
+            active_stage = 4
+        elif aggregation_active or (classification_done and not aggregation_done):
+            stages.append({"name": "Aggregation", "state": "active" if classification_done else "pending"})
+            if classification_done:
+                active_stage = 3
+        else:
+            stages.append({"name": "Aggregation", "state": "pending"})
+
+        if aggregation_done:
+            stages.append({"name": "Insights Ready", "state": "complete"})
+            active_stage = 4
+        else:
+            stages.append({"name": "Insights Ready", "state": "pending"})
+
+        return {"run_status": run_status, "active_stage": active_stage, "stages": stages}
+
+    except Exception as e:
+        print(f"Failed to get pipeline step status: {e}")
+        return {"run_status": "unknown", "active_stage": 0, "stages": pending_stages}

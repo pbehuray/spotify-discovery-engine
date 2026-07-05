@@ -7,7 +7,7 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 
-from backend import run_live_demo, trigger_full_pipeline
+from backend import run_live_demo, trigger_full_pipeline, get_pipeline_step_status
 
 # --- Page config ---
 st.set_page_config(
@@ -199,18 +199,83 @@ with tab_live:
     # --- Button 2: Trigger Full Pipeline ---
     with col2:
         if st.button("Trigger Full Pipeline", use_container_width=True):
-            with st.spinner("Dispatching GitHub Actions workflow..."):
-                try:
-                    success = trigger_full_pipeline()
-                    if success:
-                        st.success("Full pipeline triggered — running in background")
-                        st.markdown(
-                            "[View live logs on GitHub Actions →](https://github.com/pbehuray/spotify-discovery-engine/actions)"
+            st.markdown("""
+<style>
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+.stage-active { animation: blink 1s infinite; color: #1DB954; font-size: 20px; }
+.stage-complete { color: #1DB954; font-size: 20px; }
+.stage-pending { color: #535353; font-size: 20px; }
+</style>
+""", unsafe_allow_html=True)
+
+            dispatch_status = st.empty()
+            stage_display = st.empty()
+            finish_banner = st.empty()
+
+            # Dispatch
+            try:
+                success = trigger_full_pipeline()
+                if not success:
+                    dispatch_status.error("Failed to trigger pipeline. Check your GitHub token.")
+                    st.stop()
+            except Exception as e:
+                dispatch_status.error(f"Could not trigger pipeline: {e}")
+                st.stop()
+
+            dispatch_status.info("Pipeline dispatched — tracking progress...")
+
+            def render_stages(stages):
+                icons = []
+                for s in stages:
+                    if s["state"] == "complete":
+                        icons.append(
+                            f'<span class="stage-complete">&#9679; {s["name"]} &#10003;</span>'
+                        )
+                    elif s["state"] == "active":
+                        icons.append(
+                            f'<span class="stage-active">&#9679; {s["name"]}...</span>'
                         )
                     else:
-                        st.error("Failed to trigger pipeline. Check your GitHub token.")
-                except Exception as e:
-                    st.error(f"Could not trigger pipeline: {e}")
+                        icons.append(
+                            f'<span class="stage-pending">&#9711; {s["name"]}</span>'
+                        )
+                return (
+                    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;'
+                    'background:#1a1a1a;padding:1rem;border-radius:8px;">'
+                    + ' <span style="color:#535353;font-size:18px;">&#8594;</span> '.join(icons)
+                    + "</div>"
+                )
+
+            import time as _time
+            MAX_POLLS = 60   # 60 × 8s = 8 minutes max
+            for _ in range(MAX_POLLS):
+                try:
+                    status_data = get_pipeline_step_status()
+                except Exception:
+                    status_data = {"run_status": "unknown", "active_stage": 0,
+                                   "stages": [{"name": n, "state": "pending"}
+                                              for n in ["Ingestion","Classification","Aggregation","Insights Ready"]]}
+
+                stage_display.markdown(render_stages(status_data["stages"]), unsafe_allow_html=True)
+
+                run_status = status_data["run_status"]
+
+                if run_status in ("completed", "success"):
+                    dispatch_status.empty()
+                    finish_banner.success("Pipeline complete! Fresh insights are ready.")
+                    st.button(
+                        "View Pipeline Insights →",
+                        on_click=lambda: st.session_state.update({"active_tab": 1}),
+                    )
+                    break
+                elif run_status in ("failure", "cancelled", "timed_out"):
+                    dispatch_status.error(f"Pipeline ended with status: {run_status}")
+                    break
+
+                _time.sleep(8)
 
 
 RESEARCH_FINDINGS = {
