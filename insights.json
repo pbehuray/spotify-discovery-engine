@@ -1,68 +1,55 @@
 {
   "total_reviews": 1000,
   "discovery_related": {
-    "count": 241,
-    "percent": 24.1
+    "count": 234,
+    "percent": 23.4
   },
   "by_frustration_type": {
-    "stale_recommendations": 80,
-    "control_loss": 53,
-    "none": 47,
-    "discovery_friction": 28,
-    "context_blindness": 16,
-    "poor_new_release_surfacing": 7,
-    "filter_bubble_lock_in": 5,
-    "algorithmic_sameness": 4,
+    "stale_recommendations": 76,
+    "none": 48,
+    "control_loss": 47,
+    "discovery_friction": 29,
+    "context_blindness": 14,
+    "algorithmic_sameness": 7,
+    "filter_bubble_lock_in": 6,
+    "poor_new_release_surfacing": 6,
     "over_personalization": 1
   },
   "by_segment": {
-    "active_explorer": 167,
-    "unknown": 22,
+    "active_explorer": 166,
+    "unknown": 20,
     "mood_listener": 19,
-    "lapsed_explorer": 15,
-    "podcast_first": 8,
+    "lapsed_explorer": 13,
     "genre_loyalist": 8,
+    "podcast_first": 6,
     "passive_listener": 2
   },
   "by_desired_behavior": {
-    "find_new_artists": 124,
-    "none": 42,
-    "break_routine": 40,
-    "match_mood_or_context": 31,
+    "find_new_artists": 115,
+    "none": 43,
+    "break_routine": 42,
+    "match_mood_or_context": 30,
     "deep_dive_genre": 3,
     "social_discovery": 1
   },
   "by_source": {
-    "play_store": 150,
-    "forum": 38,
-    "social": 32,
+    "play_store": 151,
+    "forum": 35,
+    "social": 27,
     "reddit": 17,
     "app_store": 4
   },
   "segment_x_frustration_crosstab": {
     "active_explorer": {
-      "stale_recommendations": 64,
-      "control_loss": 33,
-      "filter_bubble_lock_in": 3,
-      "discovery_friction": 22,
-      "algorithmic_sameness": 2,
+      "stale_recommendations": 62,
+      "control_loss": 29,
+      "filter_bubble_lock_in": 5,
+      "discovery_friction": 23,
       "none": 29,
-      "poor_new_release_surfacing": 6,
+      "poor_new_release_surfacing": 5,
       "context_blindness": 7,
+      "algorithmic_sameness": 5,
       "over_personalization": 1
-    },
-    "podcast_first": {
-      "context_blindness": 2,
-      "control_loss": 6
-    },
-    "unknown": {
-      "control_loss": 7,
-      "filter_bubble_lock_in": 1,
-      "context_blindness": 2,
-      "stale_recommendations": 3,
-      "algorithmic_sameness": 2,
-      "discovery_friction": 4,
-      "none": 3
     },
     "genre_loyalist": {
       "control_loss": 5,
@@ -70,10 +57,22 @@
       "poor_new_release_surfacing": 1,
       "none": 1
     },
+    "unknown": {
+      "context_blindness": 1,
+      "stale_recommendations": 3,
+      "control_loss": 6,
+      "none": 4,
+      "algorithmic_sameness": 2,
+      "discovery_friction": 4
+    },
     "lapsed_explorer": {
-      "stale_recommendations": 12,
       "discovery_friction": 2,
+      "stale_recommendations": 10,
       "control_loss": 1
+    },
+    "podcast_first": {
+      "control_loss": 5,
+      "context_blindness": 1
     },
     "mood_listener": {
       "none": 13,
@@ -87,26 +86,26 @@
   },
   "top_root_causes": {
     "None": 31,
-    "Lack of control": 25,
-    "Lack of variety": 16,
-    "Poor algorithm": 12,
+    "Lack of control": 21,
+    "Lack of variety": 11,
+    "Poor algorithm": 9,
     "Lack of context": 5,
-    "Lack of new music": 5,
+    "Lack of new music": 4,
     "Poor shuffle": 4,
-    "Lack of feedback": 3,
     "Shuffle not working": 3,
-    "none": 3
+    "none": 3,
+    "Same songs/artists repeated in daily mixes": 2
   },
   "top_unmet_needs": {
     "None": 36,
-    "New music": 33,
-    "Music variety": 6,
-    "New music discovery": 6,
+    "New music": 25,
     "Relevant music": 5,
+    "New music discovery": 5,
+    "Personalization": 5,
     "More control": 5,
-    "Personalized music": 4,
+    "Music variety": 4,
     "Control over playlists": 4,
-    "Personalization": 4,
-    "Personalized mix": 3
+    "Variety in music recommendations": 3,
+    "Variety in recommendations": 3
   }
 }
