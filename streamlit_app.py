@@ -241,15 +241,17 @@ with tab_live:
             stage_display = st.empty()
             finish_banner = st.empty()
 
-            # Dispatch
+            # Dispatch — returns run_id (int), True (no run_id), or False (failed)
             try:
-                success = trigger_full_pipeline()
-                if not success:
+                result = trigger_full_pipeline()
+                if result is False:
                     dispatch_status.error("Failed to trigger pipeline. Check your GitHub token.")
                     st.stop()
             except Exception as e:
                 dispatch_status.error(f"Could not trigger pipeline: {e}")
                 st.stop()
+
+            triggered_run_id = result if isinstance(result, int) else None
 
             dispatch_status.info("Pipeline dispatched — tracking progress...")
             st.markdown(
@@ -283,7 +285,7 @@ with tab_live:
             pipeline_done = False
             for _ in range(MAX_POLLS):
                 try:
-                    status_data = get_pipeline_step_status()
+                    status_data = get_pipeline_step_status(run_id=triggered_run_id)
                 except Exception:
                     status_data = {"run_status": "unknown", "active_stage": 0,
                                    "stages": [{"name": n, "state": "pending"}

@@ -381,9 +381,54 @@ def trigger_github_actions():
 def trigger_full_pipeline():
     """
     Trigger the GitHub Actions workflow_dispatch for pipeline.yml.
-    Alias for trigger_github_actions().
+    Returns the new run_id if found, True if triggered but run_id not found,
+    or False if dispatch failed.
     """
-    return trigger_github_actions()
+    token = _get_secret("GITHUB_TOKEN")
+    repo = _parse_repo()
+
+    if not token:
+        raise ValueError("GITHUB_TOKEN not found in st.secrets or environment")
+
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+
+    # Get latest run_id BEFORE dispatch so we can detect the new one
+    try:
+        runs_url = f"https://api.github.com/repos/{repo}/actions/workflows/pipeline.yml/runs?per_page=1"
+        pre_resp = requests.get(runs_url, headers=headers, timeout=30)
+        pre_resp.raise_for_status()
+        pre_runs = pre_resp.json().get("workflow_runs", [])
+        pre_run_id = pre_runs[0]["id"] if pre_runs else None
+    except Exception:
+        pre_run_id = None
+
+    # Dispatch
+    dispatch_url = f"https://api.github.com/repos/{repo}/actions/workflows/pipeline.yml/dispatches"
+    try:
+        resp = requests.post(dispatch_url, headers=headers, json={"ref": "main"}, timeout=30)
+        if resp.status_code not in (204, 200):
+            return False
+    except Exception as e:
+        print(f"Failed to trigger GitHub Actions: {e}")
+        return False
+
+    # Poll up to 20s for the new run to appear
+    import time as _t
+    for _ in range(10):
+        _t.sleep(2)
+        try:
+            post_resp = requests.get(runs_url, headers=headers, timeout=30)
+            post_resp.raise_for_status()
+            post_runs = post_resp.json().get("workflow_runs", [])
+            if post_runs and post_runs[0]["id"] != pre_run_id:
+                return post_runs[0]["id"]
+        except Exception:
+            pass
+
+    return True  # dispatched but couldn't capture run_id
 
 
 def _parse_repo():
@@ -451,7 +496,7 @@ def get_pipeline_run_status():
         return "unknown"
 
 
-def get_pipeline_step_status():
+def get_pipeline_step_status(run_id=None):
     """
     Get the active pipeline stage by inspecting GitHub Actions job steps.
 
@@ -480,15 +525,21 @@ def get_pipeline_step_status():
     }
 
     try:
-        # 1. Get latest run
-        runs_url = f"https://api.github.com/repos/{repo}/actions/workflows/pipeline.yml/runs?per_page=1"
-        runs_resp = requests.get(runs_url, headers=headers, timeout=30)
-        runs_resp.raise_for_status()
-        runs = runs_resp.json().get("workflow_runs", [])
-        if not runs:
-            return {"run_status": "unknown", "active_stage": 0, "stages": pending_stages}
+        # 1. Get the specific run (by run_id if provided, else latest)
+        if run_id and isinstance(run_id, int):
+            run_url = f"https://api.github.com/repos/{repo}/actions/runs/{run_id}"
+            run_resp = requests.get(run_url, headers=headers, timeout=30)
+            run_resp.raise_for_status()
+            latest = run_resp.json()
+        else:
+            runs_url = f"https://api.github.com/repos/{repo}/actions/workflows/pipeline.yml/runs?per_page=1"
+            runs_resp = requests.get(runs_url, headers=headers, timeout=30)
+            runs_resp.raise_for_status()
+            runs = runs_resp.json().get("workflow_runs", [])
+            if not runs:
+                return {"run_status": "unknown", "active_stage": 0, "stages": pending_stages}
+            latest = runs[0]
 
-        latest = runs[0]
         run_status = latest.get("status", "unknown")
         run_conclusion = latest.get("conclusion")
         run_id = latest.get("id")
