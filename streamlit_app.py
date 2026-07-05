@@ -217,7 +217,6 @@ with tab_live:
                     "The GitHub Actions scheduler continues to ingest and classify new reviews daily."
                 )
                 st.session_state["live_demo_just_completed"] = True
-                st.rerun()
 
             except Exception as e:
                 progress_bar.empty()
@@ -307,26 +306,25 @@ with tab_live:
 
             if pipeline_done:
                 st.session_state["pipeline_just_completed"] = True
-                st.rerun()
 
 
-# --- Persistent View Pipeline Insights button (survives reruns) ---
-if st.session_state.get("pipeline_just_completed") or st.session_state.get("live_demo_just_completed"):
-    if st.session_state.get("pipeline_just_completed"):
-        st.success("Pipeline complete! Fresh insights are ready.")
-    else:
-        st.success("✓ Classification complete — pipeline insights updated.")
+    # --- Persistent View Pipeline Insights button (inside Tab 1) ---
+    if st.session_state.get("pipeline_just_completed") or st.session_state.get("live_demo_just_completed"):
+        if st.session_state.get("pipeline_just_completed"):
+            st.success("Pipeline complete! Fresh insights are ready.")
+        else:
+            st.success("✓ Classification complete — pipeline insights updated.")
 
-    def _go_to_pipeline_tab():
-        st.session_state["goto_tab"] = 1
-        st.session_state["pipeline_just_completed"] = False
-        st.session_state["live_demo_just_completed"] = False
+        def _go_to_pipeline_tab():
+            st.session_state["goto_tab"] = 1
+            st.session_state["pipeline_just_completed"] = False
+            st.session_state["live_demo_just_completed"] = False
 
-    st.button(
-        "View Pipeline Insights →",
-        on_click=_go_to_pipeline_tab,
-        key="persistent_pipeline_insights_btn",
-    )
+        st.button(
+            "View Pipeline Insights →",
+            on_click=_go_to_pipeline_tab,
+            key="persistent_pipeline_insights_btn",
+        )
 
 
 RESEARCH_FINDINGS = {
