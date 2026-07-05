@@ -213,7 +213,7 @@ with tab_live:
                     "✓ Pipeline complete — 5 reviews scraped from Play Store → classified via Groq → written to Supabase"
                 )
                 st.info(
-                    "Full pipeline stats from the research dataset (456 curated reviews) are shown in Tab 2. "
+                    "Full pipeline stats from the research dataset (456 curated reviews) are shown in Tab 4. "
                     "The GitHub Actions scheduler continues to ingest and classify new reviews daily."
                 )
 
