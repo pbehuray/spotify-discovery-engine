@@ -102,13 +102,14 @@ def get_reviews_to_classify(limit=None):
 
     return unclassified
 
-def classify_review(text, groq_client):
+def classify_review(text, groq_client, model="llama-3.3-70b-versatile"):
     """
     Classify a single review using Groq LLM.
     
     Args:
         text: Review text
         groq_client: Groq client instance
+        model: Groq model name to use
     
     Returns:
         Dictionary with classification results, or None if failed
@@ -118,7 +119,7 @@ def classify_review(text, groq_client):
     for attempt in range(MAX_RETRIES):
         try:
             response = groq_client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model=model,
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant that classifies Spotify reviews according to a fixed taxonomy. Return ONLY valid JSON."},
                     {"role": "user", "content": prompt}
@@ -215,6 +216,7 @@ def main():
     """Main execution function."""
     parser = argparse.ArgumentParser(description="Classify Spotify reviews")
     parser.add_argument("--limit", type=int, default=None, help="Maximum number of reviews to classify")
+    parser.add_argument("--model", type=str, default="llama-3.3-70b-versatile", help="Groq model to use for classification")
     args = parser.parse_args()
 
     print("=" * 60)
@@ -227,6 +229,8 @@ def main():
         raise ValueError("GROQ_API_KEY must be set in .env file")
 
     groq_client = Groq(api_key=groq_api_key)
+    model = args.model
+    print(f"Using model: {model}")
 
     # Get reviews to classify
     reviews = get_reviews_to_classify(limit=args.limit)
@@ -244,7 +248,7 @@ def main():
         print(f"\nClassifying {i}/{len(reviews)}: {review['id'][:20]}...")
         
         # Classify
-        classification = classify_review(review['text'], groq_client)
+        classification = classify_review(review['text'], groq_client, model=model)
         
         if not classification:
             print(f"  ✗ Classification failed, skipping")

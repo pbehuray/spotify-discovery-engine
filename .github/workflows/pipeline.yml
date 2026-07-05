@@ -57,9 +57,9 @@ jobs:
         run: |
           echo "Starting classifier..."
           if [ "${{ github.event_name }}" == "schedule" ]; then
-            python classify.py --limit 50
+            python classify.py --limit 50 --model llama-3.1-8b-instant
           else
-            python classify.py --limit 20
+            python classify.py --limit 20 --model llama-3.1-8b-instant
           fi
           echo "Classifier completed."
 
