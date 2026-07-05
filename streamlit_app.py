@@ -7,7 +7,7 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 
-from backend import run_live_demo, trigger_full_pipeline, load_insights
+from backend import run_live_demo, trigger_full_pipeline
 
 # --- Page config ---
 st.set_page_config(
@@ -213,37 +213,40 @@ with tab_live:
                     st.error(f"Could not trigger pipeline: {e}")
 
 
+RESEARCH_FINDINGS = {
+    "total_reviews": 456,
+    "discovery_related_count": 159,
+    "discovery_pct": 34.9,
+    "dominant_segment": "active_explorer",
+    "dominant_segment_count": 113,
+    "top_frustration": "stale_recommendations",
+    "top_frustration_count": 65,
+    "frustration_types": {"stale_recommendations": 65, "control_loss": 37, "discovery_friction": 21, "none": 14, "context_blindness": 8, "filter_bubble_lock_in": 5, "poor_new_release_surfacing": 5, "over_personalization": 2, "algorithmic_sameness": 2},
+    "segments": {"active_explorer": 113, "unknown": 15, "lapsed_explorer": 13, "podcast_first": 8, "genre_loyalist": 5, "mood_listener": 5},
+    "crosstab": {"active_explorer + stale_recommendations": 53, "active_explorer + control_loss": 22, "active_explorer + discovery_friction": 15, "active_explorer + context_blindness": 4, "active_explorer + filter_bubble_lock_in": 4, "active_explorer + poor_new_release_surfacing": 4, "active_explorer + none": 8, "lapsed_explorer + stale_recommendations": 11, "podcast_first + control_loss": 6, "unknown + discovery_friction": 4},
+    "root_causes": {"lack_of_variety": 20, "lack_of_control": 20, "poor_algorithm": 9, "none": 8, "lack_of_new_music": 4},
+    "unmet_needs": {"new_music": 36, "none": 9, "music_variety": 6, "new_music_discovery": 6, "personalized_music": 3},
+    "sources": {"play_store": 66, "forum": 42, "social": 32, "reddit": 17, "app_store": 2},
+}
+
 # ========================
 # Tab 2: Pipeline Insights
 # ========================
 with tab_insights:
     st.header("Pipeline Insights")
+    st.caption(
+        "Research findings from the curated June 2026 pipeline run: 456 reviews across Play Store, App Store, Reddit, forums, and social. "
+        "Pipeline continues ingesting daily — live demo in Tab 1."
+    )
 
-    try:
-        insights = load_insights()
-    except Exception as e:
-        st.error(f"Failed to load insights.json: {e}")
-        st.stop()
+    r = RESEARCH_FINDINGS
 
     # --- Metric cards ---
-    total = insights.get("total_reviews", 0)
-    discovery = insights.get("discovery_related", {})
-    discovery_count = discovery.get("count", 0)
-    discovery_pct = discovery.get("percent", 0)
-
-    by_segment = insights.get("by_segment", {})
-    dominant_segment = max(by_segment, key=by_segment.get) if by_segment else "N/A"
-    dominant_segment_count = by_segment.get(dominant_segment, 0)
-
-    by_frustration = insights.get("by_frustration_type", {})
-    top_frustration = max(by_frustration, key=by_frustration.get) if by_frustration else "N/A"
-    top_frustration_count = by_frustration.get(top_frustration, 0)
-
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Total Reviews", f"{total}")
-    c2.metric("Discovery-related", f"{discovery_count}", f"{discovery_pct}%")
-    c3.metric("Dominant Segment", f"{dominant_segment}", f"{dominant_segment_count}")
-    c4.metric("Top Frustration", f"{top_frustration}", f"{top_frustration_count}")
+    c1.metric("Total Reviews", str(r["total_reviews"]))
+    c2.metric("Discovery-related", str(r["discovery_related_count"]), f"{r['discovery_pct']}%")
+    c3.metric("Dominant Segment", r["dominant_segment"], str(r["dominant_segment_count"]))
+    c4.metric("Top Frustration", r["top_frustration"], str(r["top_frustration_count"]))
 
     st.divider()
 
@@ -252,169 +255,19 @@ with tab_insights:
 
     with col_a:
         st.subheader("Frustration Types")
-        if by_frustration:
-            df_frustration = pd.DataFrame(
-                {
-                    "Frustration Type": list(by_frustration.keys()),
-                    "Count": list(by_frustration.values()),
-                }
-            ).sort_values("Count", ascending=True)
-            fig = px.bar(
-                df_frustration,
-                x="Count",
-                y="Frustration Type",
-                orientation="h",
-                color="Count",
-                color_continuous_scale=["#181818", SPOTIFY_GREEN],
-                template="plotly_dark",
-            )
-            fig.update_layout(
-                paper_bgcolor=DARK_BG,
-                plot_bgcolor=DARK_BG,
-                font_color="#ffffff",
-                margin=dict(l=20, r=20, t=20, b=20),
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-    with col_b:
-        st.subheader("Segment Distribution")
-        if by_segment:
-            df_segment = pd.DataFrame(
-                {
-                    "Segment": list(by_segment.keys()),
-                    "Count": list(by_segment.values()),
-                }
-            ).sort_values("Count", ascending=False)
-            fig = px.bar(
-                df_segment,
-                x="Segment",
-                y="Count",
-                color="Count",
-                color_continuous_scale=["#181818", SPOTIFY_GREEN],
-                template="plotly_dark",
-            )
-            fig.update_layout(
-                paper_bgcolor=DARK_BG,
-                plot_bgcolor=DARK_BG,
-                font_color="#ffffff",
-                margin=dict(l=20, r=20, t=20, b=20),
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-    # --- Heatmap row ---
-    st.subheader("Segment × Frustration Crosstab")
-    crosstab = insights.get("segment_x_frustration_crosstab", {})
-    if crosstab:
-        segments = list(crosstab.keys())
-        frustrations = sorted(
-            set(
-                f for seg_values in crosstab.values() for f in seg_values.keys()
-            )
-        )
-        heatmap_data = []
-        for seg in segments:
-            row = [seg]
-            for f in frustrations:
-                val = crosstab.get(seg, {}).get(f, 0)
-                row.append(val)
-            heatmap_data.append(row)
-
-        df_heatmap = pd.DataFrame(heatmap_data, columns=["Segment"] + frustrations)
-        df_heatmap = df_heatmap.set_index("Segment")
-
-        fig = px.imshow(
-            df_heatmap,
-            color_continuous_scale=["#181818", SPOTIFY_GREEN],
-            template="plotly_dark",
-            aspect="auto",
-            text_auto=True,
-        )
-        fig.update_layout(
-            paper_bgcolor=DARK_BG,
-            plot_bgcolor=DARK_BG,
-            font_color="#ffffff",
-            xaxis_title="Frustration Type",
-            yaxis_title="Segment",
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-        st.caption(
-            f"Highlight: **{dominant_segment}** + **{top_frustration}** = {crosstab.get(dominant_segment, {}).get(top_frustration, 0)} reviews"
-        )
-
-    # --- Root causes & unmet needs ---
-    col_c, col_d = st.columns(2)
-
-    with col_c:
-        st.subheader("Top Root Causes")
-        root_causes = insights.get("top_root_causes", {})
-        if root_causes:
-            df_root = pd.DataFrame(
-                {
-                    "Root Cause": list(root_causes.keys())[:10],
-                    "Count": list(root_causes.values())[:10],
-                }
-            )
-            fig = px.bar(
-                df_root,
-                x="Count",
-                y="Root Cause",
-                orientation="h",
-                color="Count",
-                color_continuous_scale=["#181818", SPOTIFY_GREEN],
-                template="plotly_dark",
-            )
-            fig.update_layout(
-                paper_bgcolor=DARK_BG,
-                plot_bgcolor=DARK_BG,
-                font_color="#ffffff",
-                margin=dict(l=20, r=20, t=20, b=20),
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-    with col_d:
-        st.subheader("Top Unmet Needs")
-        unmet_needs = insights.get("top_unmet_needs", {})
-        if unmet_needs:
-            df_needs = pd.DataFrame(
-                {
-                    "Unmet Need": list(unmet_needs.keys())[:10],
-                    "Count": list(unmet_needs.values())[:10],
-                }
-            )
-            fig = px.bar(
-                df_needs,
-                x="Count",
-                y="Unmet Need",
-                orientation="h",
-                color="Count",
-                color_continuous_scale=["#181818", SPOTIFY_GREEN],
-                template="plotly_dark",
-            )
-            fig.update_layout(
-                paper_bgcolor=DARK_BG,
-                plot_bgcolor=DARK_BG,
-                font_color="#ffffff",
-                margin=dict(l=20, r=20, t=20, b=20),
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-    # --- Source breakdown ---
-    st.subheader("Review Source Breakdown")
-    by_source = insights.get("by_source", {})
-    if by_source:
-        df_source = pd.DataFrame(
+        df_frustration = pd.DataFrame(
             {
-                "Source": list(by_source.keys()),
-                "Count": list(by_source.values()),
+                "Frustration Type": list(r["frustration_types"].keys()),
+                "Count": list(r["frustration_types"].values()),
             }
-        )
-        fig = px.pie(
-            df_source,
-            names="Source",
-            values="Count",
-            color="Source",
-            color_discrete_sequence=["#1DB954", "#1ed760", "#2a2a2a", "#333333", "#444444"],
+        ).sort_values("Count", ascending=True)
+        fig = px.bar(
+            df_frustration,
+            x="Count",
+            y="Frustration Type",
+            orientation="h",
+            color="Count",
+            color_continuous_scale=["#181818", SPOTIFY_GREEN],
             template="plotly_dark",
         )
         fig.update_layout(
@@ -424,6 +277,137 @@ with tab_insights:
             margin=dict(l=20, r=20, t=20, b=20),
         )
         st.plotly_chart(fig, use_container_width=True)
+
+    with col_b:
+        st.subheader("Segment Distribution")
+        df_segment = pd.DataFrame(
+            {
+                "Segment": list(r["segments"].keys()),
+                "Count": list(r["segments"].values()),
+            }
+        ).sort_values("Count", ascending=False)
+        fig = px.bar(
+            df_segment,
+            x="Segment",
+            y="Count",
+            color="Count",
+            color_continuous_scale=["#181818", SPOTIFY_GREEN],
+            template="plotly_dark",
+        )
+        fig.update_layout(
+            paper_bgcolor=DARK_BG,
+            plot_bgcolor=DARK_BG,
+            font_color="#ffffff",
+            margin=dict(l=20, r=20, t=20, b=20),
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    # --- Heatmap: segment × frustration from flat crosstab ---
+    st.subheader("Segment × Frustration Crosstab")
+    crosstab_flat = r["crosstab"]
+    segments_seen = sorted(set(k.split(" + ")[0] for k in crosstab_flat))
+    frustrations_seen = sorted(set(k.split(" + ")[1] for k in crosstab_flat))
+    heatmap_data = {
+        f: {s: crosstab_flat.get(f"{s} + {f}", 0) for s in segments_seen}
+        for f in frustrations_seen
+    }
+    df_heatmap = pd.DataFrame(heatmap_data, index=segments_seen)
+    fig = px.imshow(
+        df_heatmap,
+        color_continuous_scale=["#181818", SPOTIFY_GREEN],
+        template="plotly_dark",
+        aspect="auto",
+        text_auto=True,
+    )
+    fig.update_layout(
+        paper_bgcolor=DARK_BG,
+        plot_bgcolor=DARK_BG,
+        font_color="#ffffff",
+        xaxis_title="Frustration Type",
+        yaxis_title="Segment",
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    st.caption(
+        f"Highlight: **{r['dominant_segment']}** + **{r['top_frustration']}** = "
+        f"{crosstab_flat.get(r['dominant_segment'] + ' + ' + r['top_frustration'], 0)} reviews"
+    )
+
+    # --- Root causes & unmet needs ---
+    col_c, col_d = st.columns(2)
+
+    with col_c:
+        st.subheader("Top Root Causes")
+        df_root = pd.DataFrame(
+            {
+                "Root Cause": list(r["root_causes"].keys()),
+                "Count": list(r["root_causes"].values()),
+            }
+        )
+        fig = px.bar(
+            df_root,
+            x="Count",
+            y="Root Cause",
+            orientation="h",
+            color="Count",
+            color_continuous_scale=["#181818", SPOTIFY_GREEN],
+            template="plotly_dark",
+        )
+        fig.update_layout(
+            paper_bgcolor=DARK_BG,
+            plot_bgcolor=DARK_BG,
+            font_color="#ffffff",
+            margin=dict(l=20, r=20, t=20, b=20),
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col_d:
+        st.subheader("Top Unmet Needs")
+        df_needs = pd.DataFrame(
+            {
+                "Unmet Need": list(r["unmet_needs"].keys()),
+                "Count": list(r["unmet_needs"].values()),
+            }
+        )
+        fig = px.bar(
+            df_needs,
+            x="Count",
+            y="Unmet Need",
+            orientation="h",
+            color="Count",
+            color_continuous_scale=["#181818", SPOTIFY_GREEN],
+            template="plotly_dark",
+        )
+        fig.update_layout(
+            paper_bgcolor=DARK_BG,
+            plot_bgcolor=DARK_BG,
+            font_color="#ffffff",
+            margin=dict(l=20, r=20, t=20, b=20),
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    # --- Source breakdown ---
+    st.subheader("Review Source Breakdown")
+    df_source = pd.DataFrame(
+        {
+            "Source": list(r["sources"].keys()),
+            "Count": list(r["sources"].values()),
+        }
+    )
+    fig = px.pie(
+        df_source,
+        names="Source",
+        values="Count",
+        color="Source",
+        color_discrete_sequence=["#1DB954", "#1ed760", "#2a2a2a", "#333333", "#444444"],
+        template="plotly_dark",
+    )
+    fig.update_layout(
+        paper_bgcolor=DARK_BG,
+        plot_bgcolor=DARK_BG,
+        font_color="#ffffff",
+        margin=dict(l=20, r=20, t=20, b=20),
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # ========================
