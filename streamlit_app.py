@@ -251,6 +251,9 @@ with tab_live:
                 st.stop()
 
             dispatch_status.info("Pipeline dispatched — tracking progress...")
+            st.markdown(
+                "[View live logs on GitHub Actions →](https://github.com/pbehuray/spotify-discovery-engine/actions)"
+            )
 
             def render_stages(stages):
                 icons = []
