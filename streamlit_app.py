@@ -225,7 +225,26 @@ with tab_live:
     # --- Button 2: Trigger Full Pipeline ---
     with col2:
         if st.button("Trigger Full Pipeline", use_container_width=True):
-            st.markdown("""
+            # Dispatch — returns run_id (int), True, or False
+            try:
+                result = trigger_full_pipeline()
+                if result is False:
+                    st.error("Failed to trigger pipeline. Check your GitHub token.")
+                    st.stop()
+            except Exception as e:
+                st.error(f"Could not trigger pipeline: {e}")
+                st.stop()
+
+            st.session_state["pipeline_run_id"] = result if isinstance(result, int) else None
+            st.session_state["pipeline_polling"] = True
+            st.session_state["pipeline_poll_count"] = 0
+            st.rerun()
+
+    # --- Pipeline stage tracker (rerun-based polling, survives script timeout) ---
+    if st.session_state.get("pipeline_polling"):
+        import time as _time
+
+        st.markdown("""
 <style>
 @keyframes blink {
     0%, 100% { opacity: 1; }
@@ -237,77 +256,56 @@ with tab_live:
 </style>
 """, unsafe_allow_html=True)
 
-            dispatch_status = st.empty()
-            stage_display = st.empty()
-            finish_banner = st.empty()
+        st.info("Pipeline dispatched — tracking progress...")
+        st.markdown(
+            "[View live logs on GitHub Actions →](https://github.com/pbehuray/spotify-discovery-engine/actions)"
+        )
 
-            # Dispatch — returns run_id (int), True (no run_id), or False (failed)
-            try:
-                result = trigger_full_pipeline()
-                if result is False:
-                    dispatch_status.error("Failed to trigger pipeline. Check your GitHub token.")
-                    st.stop()
-            except Exception as e:
-                dispatch_status.error(f"Could not trigger pipeline: {e}")
-                st.stop()
-
-            triggered_run_id = result if isinstance(result, int) else None
-
-            dispatch_status.info("Pipeline dispatched — tracking progress...")
-            st.markdown(
-                "[View live logs on GitHub Actions →](https://github.com/pbehuray/spotify-discovery-engine/actions)"
+        def render_stages(stages):
+            icons = []
+            for s in stages:
+                if s["state"] == "complete":
+                    icons.append(f'<span class="stage-complete">&#9679; {s["name"]} &#10003;</span>')
+                elif s["state"] == "active":
+                    icons.append(f'<span class="stage-active">&#9679; {s["name"]}...</span>')
+                else:
+                    icons.append(f'<span class="stage-pending">&#9711; {s["name"]}</span>')
+            return (
+                '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;'
+                'background:#1a1a1a;padding:1rem;border-radius:8px;">'
+                + ' <span style="color:#535353;font-size:18px;">&#8594;</span> '.join(icons)
+                + "</div>"
             )
 
-            def render_stages(stages):
-                icons = []
-                for s in stages:
-                    if s["state"] == "complete":
-                        icons.append(
-                            f'<span class="stage-complete">&#9679; {s["name"]} &#10003;</span>'
-                        )
-                    elif s["state"] == "active":
-                        icons.append(
-                            f'<span class="stage-active">&#9679; {s["name"]}...</span>'
-                        )
-                    else:
-                        icons.append(
-                            f'<span class="stage-pending">&#9711; {s["name"]}</span>'
-                        )
-                return (
-                    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;'
-                    'background:#1a1a1a;padding:1rem;border-radius:8px;">'
-                    + ' <span style="color:#535353;font-size:18px;">&#8594;</span> '.join(icons)
-                    + "</div>"
-                )
+        try:
+            status_data = get_pipeline_step_status(
+                run_id=st.session_state.get("pipeline_run_id")
+            )
+        except Exception as ex:
+            status_data = {"run_status": "unknown", "active_stage": 0,
+                           "stages": [{"name": n, "state": "pending"}
+                                       for n in ["Ingestion","Classification","Aggregation","Insights Ready"]]}
 
-            import time as _time
-            MAX_POLLS = 60   # 60 × 8s = 8 minutes max
-            pipeline_done = False
-            for _ in range(MAX_POLLS):
-                try:
-                    status_data = get_pipeline_step_status(run_id=triggered_run_id)
-                except Exception:
-                    status_data = {"run_status": "unknown", "active_stage": 0,
-                                   "stages": [{"name": n, "state": "pending"}
-                                              for n in ["Ingestion","Classification","Aggregation","Insights Ready"]]}
+        st.markdown(render_stages(status_data["stages"]), unsafe_allow_html=True)
+        run_status = status_data["run_status"]
+        poll_count = st.session_state.get("pipeline_poll_count", 0)
 
-                stage_display.markdown(render_stages(status_data["stages"]), unsafe_allow_html=True)
-
-                run_status = status_data["run_status"]
-
-                if run_status in ("completed", "success"):
-                    dispatch_status.empty()
-                    finish_banner.success("Pipeline complete! Fresh insights are ready.")
-                    pipeline_done = True
-                    break
-                elif run_status in ("failure", "cancelled", "timed_out"):
-                    dispatch_status.error(f"Pipeline ended with status: {run_status}")
-                    break
-
-                _time.sleep(8)
-
-            if pipeline_done:
-                st.session_state["pipeline_just_completed"] = True
+        if run_status in ("completed", "success"):
+            st.session_state["pipeline_polling"] = False
+            st.session_state["pipeline_run_id"] = None
+            st.session_state["pipeline_poll_count"] = 0
+            st.session_state["pipeline_just_completed"] = True
+            st.rerun()
+        elif run_status in ("failure", "cancelled", "timed_out"):
+            st.session_state["pipeline_polling"] = False
+            st.error(f"Pipeline ended with status: {run_status}")
+        elif poll_count < 60:
+            st.session_state["pipeline_poll_count"] = poll_count + 1
+            _time.sleep(8)
+            st.rerun()
+        else:
+            st.session_state["pipeline_polling"] = False
+            st.warning("Pipeline tracker timed out. Check GitHub Actions for status.")
 
 
     # --- Persistent View Pipeline Insights button (inside Tab 1) ---
