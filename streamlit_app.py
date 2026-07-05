@@ -159,7 +159,7 @@ with tab_live:
 
     # --- Button 1: Live Demo ---
     with col1:
-        if st.button("🚀 Live Demo: Classify 5 Fresh Reviews", use_container_width=True):
+        if st.button("Live Demo: Classify 5 Fresh Reviews", use_container_width=True):
             status = st.empty()
             progress_bar = st.progress(0)
             cards_container = st.empty()
@@ -198,7 +198,7 @@ with tab_live:
 
     # --- Button 2: Trigger Full Pipeline ---
     with col2:
-        if st.button("⚙️ Trigger Full Pipeline", use_container_width=True):
+        if st.button("Trigger Full Pipeline", use_container_width=True):
             with st.spinner("Dispatching GitHub Actions workflow..."):
                 try:
                     success = trigger_full_pipeline()
