@@ -45,11 +45,11 @@
 
 | Source | Count |
 |--------|-------|
-| play_store | 66 |
+| play_store | 353 |
 | forum | 42 |
-| social | 32 |
-| reddit | 17 |
-| app_store | 2 |
+| social | 33 |
+| reddit | 18 |
+| app_store | 10 |
 
 ## Segment × Frustration Type Crosstab
 

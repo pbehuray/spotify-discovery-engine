@@ -45,11 +45,11 @@ These findings directly drove the Discovery Dial feature concept — a playlist-
 
 | Source | Reviews | Method |
 |---|---|---|
-| Google Play Store | 66 | Live scraper (automated) |
+| Google Play Store | 353 | Live scraper (automated) |
 | Forums | 42 | Hand collected |
-| Social (Twitter/X) | 32 | Hand collected |
-| Reddit (r/spotify) | 17 | Hand collected |
-| App Store | 2 | Hand collected |
+| Social (Twitter/X) | 33 | Hand collected |
+| Reddit (r/spotify) | 18 | Hand collected |
+| App Store | 10 | Hand collected |
 
 ---
 

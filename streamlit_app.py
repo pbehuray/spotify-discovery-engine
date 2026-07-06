@@ -341,7 +341,7 @@ RESEARCH_FINDINGS = {
     "crosstab": {"active_explorer + stale_recommendations": 53, "active_explorer + control_loss": 22, "active_explorer + discovery_friction": 15, "active_explorer + context_blindness": 4, "active_explorer + filter_bubble_lock_in": 4, "active_explorer + poor_new_release_surfacing": 4, "active_explorer + none": 8, "lapsed_explorer + stale_recommendations": 11, "podcast_first + control_loss": 6, "unknown + discovery_friction": 4},
     "root_causes": {"lack_of_variety": 20, "lack_of_control": 20, "poor_algorithm": 9, "none": 8, "lack_of_new_music": 4},
     "unmet_needs": {"new_music": 36, "none": 9, "music_variety": 6, "new_music_discovery": 6, "personalized_music": 3},
-    "sources": {"play_store": 66, "forum": 42, "social": 32, "reddit": 17, "app_store": 2},
+    "sources": {"play_store": 353, "forum": 42, "social": 33, "reddit": 18, "app_store": 10},
 }
 
 # ========================
