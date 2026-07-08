@@ -25,8 +25,8 @@
     "passive_listener": 2
   },
   "by_desired_behavior": {
-    "find_new_artists": 116,
-    "break_routine": 42,
+    "find_new_artists": 115,
+    "break_routine": 43,
     "none": 41,
     "match_mood_or_context": 28,
     "deep_dive_genre": 3,
@@ -98,13 +98,13 @@
   "top_unmet_needs": {
     "None": 36,
     "New music": 24,
-    "Variety in recommendations": 5,
     "New music discovery": 5,
     "Personalization": 5,
     "More control": 5,
+    "Variety in recommendations": 4,
     "Control over playlists": 4,
+    "Variety in music recommendations": 3,
     "Music variety": 3,
-    "True randomness": 3,
-    "none": 3
+    "True randomness": 3
   }
 }
