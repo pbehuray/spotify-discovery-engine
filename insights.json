@@ -1,22 +1,22 @@
 {
   "total_reviews": 1000,
   "discovery_related": {
-    "count": 231,
-    "percent": 23.1
+    "count": 230,
+    "percent": 23.0
   },
   "by_frustration_type": {
-    "stale_recommendations": 73,
+    "stale_recommendations": 72,
     "none": 48,
     "control_loss": 44,
     "discovery_friction": 29,
+    "algorithmic_sameness": 12,
     "context_blindness": 12,
-    "algorithmic_sameness": 11,
-    "filter_bubble_lock_in": 6,
     "poor_new_release_surfacing": 6,
+    "filter_bubble_lock_in": 5,
     "over_personalization": 2
   },
   "by_segment": {
-    "active_explorer": 166,
+    "active_explorer": 165,
     "mood_listener": 19,
     "unknown": 18,
     "lapsed_explorer": 13,
@@ -25,7 +25,7 @@
     "passive_listener": 2
   },
   "by_desired_behavior": {
-    "find_new_artists": 116,
+    "find_new_artists": 115,
     "break_routine": 42,
     "none": 41,
     "match_mood_or_context": 28,
@@ -34,20 +34,20 @@
   },
   "by_source": {
     "play_store": 151,
-    "forum": 32,
+    "forum": 31,
     "social": 27,
     "reddit": 17,
     "app_store": 4
   },
   "segment_x_frustration_crosstab": {
     "active_explorer": {
-      "stale_recommendations": 60,
+      "stale_recommendations": 59,
       "control_loss": 27,
-      "filter_bubble_lock_in": 5,
       "discovery_friction": 23,
       "none": 29,
+      "filter_bubble_lock_in": 4,
+      "algorithmic_sameness": 10,
       "poor_new_release_surfacing": 5,
-      "algorithmic_sameness": 9,
       "over_personalization": 2,
       "context_blindness": 6
     },
@@ -86,8 +86,8 @@
   "top_root_causes": {
     "None": 31,
     "Lack of control": 20,
-    "Lack of variety": 9,
     "Poor algorithm": 9,
+    "Lack of variety": 8,
     "Lack of new music": 4,
     "Lack of context": 4,
     "Poor shuffle": 4,
@@ -97,14 +97,14 @@
   },
   "top_unmet_needs": {
     "None": 36,
-    "New music": 23,
-    "Variety in recommendations": 5,
+    "New music": 22,
     "New music discovery": 5,
     "Personalization": 5,
     "More control": 5,
     "Control over playlists": 4,
+    "Variety in music recommendations": 3,
+    "Variety in recommendations": 3,
     "Music variety": 3,
-    "True randomness": 3,
-    "none": 3
+    "True randomness": 3
   }
 }
