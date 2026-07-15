@@ -45,8 +45,8 @@
       "control_loss": 26,
       "discovery_friction": 23,
       "filter_bubble_lock_in": 4,
-      "algorithmic_sameness": 11,
       "none": 29,
+      "algorithmic_sameness": 11,
       "poor_new_release_surfacing": 5,
       "over_personalization": 2,
       "context_blindness": 6
