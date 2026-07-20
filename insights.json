@@ -1,11 +1,11 @@
 {
   "total_reviews": 1000,
   "discovery_related": {
-    "count": 230,
-    "percent": 23.0
+    "count": 228,
+    "percent": 22.8
   },
   "by_frustration_type": {
-    "stale_recommendations": 72,
+    "stale_recommendations": 70,
     "none": 48,
     "control_loss": 43,
     "discovery_friction": 29,
@@ -16,16 +16,16 @@
     "over_personalization": 2
   },
   "by_segment": {
-    "active_explorer": 165,
+    "active_explorer": 164,
     "mood_listener": 19,
     "unknown": 18,
-    "lapsed_explorer": 13,
+    "lapsed_explorer": 12,
     "genre_loyalist": 7,
     "podcast_first": 6,
     "passive_listener": 2
   },
   "by_desired_behavior": {
-    "find_new_artists": 116,
+    "find_new_artists": 114,
     "break_routine": 41,
     "none": 41,
     "match_mood_or_context": 28,
@@ -36,12 +36,12 @@
     "play_store": 151,
     "forum": 31,
     "social": 27,
-    "reddit": 17,
+    "reddit": 15,
     "app_store": 4
   },
   "segment_x_frustration_crosstab": {
     "active_explorer": {
-      "stale_recommendations": 59,
+      "stale_recommendations": 58,
       "control_loss": 26,
       "discovery_friction": 23,
       "none": 29,
@@ -59,7 +59,7 @@
     },
     "lapsed_explorer": {
       "discovery_friction": 2,
-      "stale_recommendations": 10,
+      "stale_recommendations": 9,
       "control_loss": 1
     },
     "unknown": {
@@ -87,7 +87,7 @@
     "None": 31,
     "Lack of control": 20,
     "Poor algorithm": 9,
-    "Lack of variety": 8,
+    "Lack of variety": 6,
     "Lack of new music": 4,
     "Lack of context": 4,
     "Poor shuffle": 4,
@@ -97,7 +97,7 @@
   },
   "top_unmet_needs": {
     "None": 36,
-    "New music": 22,
+    "New music": 19,
     "New music discovery": 5,
     "Personalization": 5,
     "More control": 5,
