@@ -5,11 +5,11 @@
     "percent": 22.8
   },
   "by_frustration_type": {
-    "stale_recommendations": 70,
+    "stale_recommendations": 69,
     "none": 48,
     "control_loss": 43,
     "discovery_friction": 29,
-    "algorithmic_sameness": 13,
+    "algorithmic_sameness": 14,
     "context_blindness": 12,
     "poor_new_release_surfacing": 6,
     "filter_bubble_lock_in": 5,
@@ -41,12 +41,12 @@
   },
   "segment_x_frustration_crosstab": {
     "active_explorer": {
-      "stale_recommendations": 58,
+      "stale_recommendations": 57,
       "control_loss": 26,
       "discovery_friction": 23,
-      "none": 29,
       "filter_bubble_lock_in": 4,
-      "algorithmic_sameness": 11,
+      "algorithmic_sameness": 12,
+      "none": 29,
       "poor_new_release_surfacing": 5,
       "over_personalization": 2,
       "context_blindness": 6
@@ -87,7 +87,7 @@
     "None": 31,
     "Lack of control": 20,
     "Poor algorithm": 9,
-    "Lack of variety": 6,
+    "Lack of variety": 5,
     "Lack of new music": 4,
     "Lack of context": 4,
     "Poor shuffle": 4,
@@ -97,7 +97,7 @@
   },
   "top_unmet_needs": {
     "None": 36,
-    "New music": 19,
+    "New music": 18,
     "New music discovery": 5,
     "Personalization": 5,
     "More control": 5,
