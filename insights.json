@@ -5,11 +5,11 @@
     "percent": 22.8
   },
   "by_frustration_type": {
-    "stale_recommendations": 69,
+    "stale_recommendations": 68,
     "none": 48,
     "control_loss": 43,
     "discovery_friction": 29,
-    "algorithmic_sameness": 14,
+    "algorithmic_sameness": 15,
     "context_blindness": 12,
     "poor_new_release_surfacing": 6,
     "filter_bubble_lock_in": 5,
@@ -41,11 +41,11 @@
   },
   "segment_x_frustration_crosstab": {
     "active_explorer": {
-      "stale_recommendations": 57,
+      "stale_recommendations": 56,
       "control_loss": 26,
       "discovery_friction": 23,
       "filter_bubble_lock_in": 4,
-      "algorithmic_sameness": 12,
+      "algorithmic_sameness": 13,
       "none": 29,
       "poor_new_release_surfacing": 5,
       "over_personalization": 2,
