@@ -7,27 +7,27 @@
   "by_frustration_type": {
     "stale_recommendations": 69,
     "none": 48,
-    "control_loss": 43,
+    "control_loss": 42,
     "discovery_friction": 28,
-    "algorithmic_sameness": 14,
+    "algorithmic_sameness": 15,
     "context_blindness": 12,
     "poor_new_release_surfacing": 6,
     "filter_bubble_lock_in": 5,
     "over_personalization": 2
   },
   "by_segment": {
-    "active_explorer": 162,
+    "active_explorer": 163,
     "mood_listener": 19,
-    "unknown": 18,
+    "unknown": 17,
     "lapsed_explorer": 13,
     "genre_loyalist": 7,
     "podcast_first": 6,
     "passive_listener": 2
   },
   "by_desired_behavior": {
-    "find_new_artists": 111,
+    "find_new_artists": 112,
     "break_routine": 43,
-    "none": 41,
+    "none": 40,
     "match_mood_or_context": 28,
     "deep_dive_genre": 3,
     "social_discovery": 1
@@ -46,7 +46,7 @@
       "discovery_friction": 21,
       "filter_bubble_lock_in": 4,
       "none": 29,
-      "algorithmic_sameness": 12,
+      "algorithmic_sameness": 13,
       "poor_new_release_surfacing": 5,
       "over_personalization": 2,
       "context_blindness": 6
@@ -63,10 +63,10 @@
       "control_loss": 1
     },
     "unknown": {
-      "control_loss": 6,
       "none": 4,
       "algorithmic_sameness": 2,
       "discovery_friction": 4,
+      "control_loss": 5,
       "stale_recommendations": 2
     },
     "podcast_first": {
