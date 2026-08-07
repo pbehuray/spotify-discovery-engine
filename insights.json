@@ -5,21 +5,21 @@
     "percent": 22.7
   },
   "by_frustration_type": {
-    "stale_recommendations": 69,
+    "stale_recommendations": 68,
     "none": 48,
     "control_loss": 42,
-    "discovery_friction": 28,
-    "algorithmic_sameness": 15,
+    "discovery_friction": 27,
+    "algorithmic_sameness": 16,
     "context_blindness": 12,
     "poor_new_release_surfacing": 6,
     "filter_bubble_lock_in": 5,
-    "over_personalization": 2
+    "over_personalization": 3
   },
   "by_segment": {
-    "active_explorer": 163,
+    "active_explorer": 164,
     "mood_listener": 19,
     "unknown": 17,
-    "lapsed_explorer": 13,
+    "lapsed_explorer": 12,
     "genre_loyalist": 7,
     "podcast_first": 6,
     "passive_listener": 2
@@ -43,12 +43,12 @@
     "active_explorer": {
       "stale_recommendations": 57,
       "control_loss": 26,
-      "discovery_friction": 21,
+      "discovery_friction": 20,
       "filter_bubble_lock_in": 4,
       "none": 29,
-      "algorithmic_sameness": 13,
+      "algorithmic_sameness": 14,
       "poor_new_release_surfacing": 5,
-      "over_personalization": 2,
+      "over_personalization": 3,
       "context_blindness": 6
     },
     "genre_loyalist": {
@@ -59,7 +59,7 @@
     },
     "lapsed_explorer": {
       "discovery_friction": 3,
-      "stale_recommendations": 9,
+      "stale_recommendations": 8,
       "control_loss": 1
     },
     "unknown": {
