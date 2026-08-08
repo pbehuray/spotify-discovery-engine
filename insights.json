@@ -5,10 +5,10 @@
     "percent": 22.7
   },
   "by_frustration_type": {
-    "stale_recommendations": 68,
+    "stale_recommendations": 67,
     "none": 48,
     "control_loss": 42,
-    "discovery_friction": 27,
+    "discovery_friction": 28,
     "algorithmic_sameness": 16,
     "context_blindness": 12,
     "poor_new_release_surfacing": 6,
@@ -58,8 +58,8 @@
       "none": 1
     },
     "lapsed_explorer": {
-      "discovery_friction": 3,
-      "stale_recommendations": 8,
+      "discovery_friction": 4,
+      "stale_recommendations": 7,
       "control_loss": 1
     },
     "unknown": {
@@ -88,21 +88,21 @@
     "Lack of control": 20,
     "Poor algorithm": 9,
     "Lack of variety": 5,
-    "Lack of new music": 4,
     "Lack of context": 4,
     "Poor shuffle": 4,
     "Shuffle not working": 3,
     "none": 3,
-    "Same songs/artists repeated in daily mixes": 2
+    "Same songs/artists repeated in daily mixes": 2,
+    "algorithm chooses music, not user": 2
   },
   "top_unmet_needs": {
     "None": 36,
     "New music": 17,
-    "New music discovery": 5,
     "Personalization": 5,
     "More control": 5,
     "Control over playlists": 4,
     "Variety in music recommendations": 3,
+    "New music discovery": 3,
     "Variety in recommendations": 3,
     "Music variety": 3,
     "True randomness": 3
