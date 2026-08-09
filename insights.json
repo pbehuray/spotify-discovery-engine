@@ -8,8 +8,8 @@
     "stale_recommendations": 67,
     "none": 48,
     "control_loss": 42,
-    "discovery_friction": 28,
-    "algorithmic_sameness": 16,
+    "discovery_friction": 27,
+    "algorithmic_sameness": 17,
     "context_blindness": 12,
     "poor_new_release_surfacing": 6,
     "filter_bubble_lock_in": 5,
@@ -33,9 +33,9 @@
     "social_discovery": 1
   },
   "by_source": {
-    "play_store": 151,
+    "play_store": 152,
     "forum": 31,
-    "social": 26,
+    "social": 25,
     "reddit": 15,
     "app_store": 4
   },
@@ -43,10 +43,10 @@
     "active_explorer": {
       "stale_recommendations": 57,
       "control_loss": 26,
-      "discovery_friction": 20,
+      "discovery_friction": 19,
       "filter_bubble_lock_in": 4,
       "none": 29,
-      "algorithmic_sameness": 14,
+      "algorithmic_sameness": 15,
       "poor_new_release_surfacing": 5,
       "over_personalization": 3,
       "context_blindness": 6
@@ -86,14 +86,14 @@
   "top_root_causes": {
     "None": 31,
     "Lack of control": 20,
-    "Poor algorithm": 9,
+    "Poor algorithm": 10,
     "Lack of variety": 5,
     "Lack of context": 4,
     "Poor shuffle": 4,
     "Shuffle not working": 3,
     "none": 3,
     "Same songs/artists repeated in daily mixes": 2,
-    "algorithm chooses music, not user": 2
+    "Lack of new music": 2
   },
   "top_unmet_needs": {
     "None": 36,
