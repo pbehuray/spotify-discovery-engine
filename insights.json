@@ -5,11 +5,11 @@
     "percent": 22.7
   },
   "by_frustration_type": {
-    "stale_recommendations": 67,
+    "stale_recommendations": 65,
     "none": 48,
     "control_loss": 42,
     "discovery_friction": 27,
-    "algorithmic_sameness": 17,
+    "algorithmic_sameness": 19,
     "context_blindness": 12,
     "poor_new_release_surfacing": 6,
     "filter_bubble_lock_in": 5,
@@ -25,8 +25,8 @@
     "passive_listener": 2
   },
   "by_desired_behavior": {
-    "find_new_artists": 112,
-    "break_routine": 43,
+    "find_new_artists": 110,
+    "break_routine": 45,
     "none": 40,
     "match_mood_or_context": 28,
     "deep_dive_genre": 3,
@@ -41,12 +41,12 @@
   },
   "segment_x_frustration_crosstab": {
     "active_explorer": {
-      "stale_recommendations": 57,
+      "stale_recommendations": 55,
       "control_loss": 26,
       "discovery_friction": 19,
       "filter_bubble_lock_in": 4,
       "none": 29,
-      "algorithmic_sameness": 15,
+      "algorithmic_sameness": 17,
       "poor_new_release_surfacing": 5,
       "over_personalization": 3,
       "context_blindness": 6
@@ -87,21 +87,21 @@
     "None": 31,
     "Lack of control": 20,
     "Poor algorithm": 10,
-    "Lack of variety": 5,
+    "Lack of variety": 4,
     "Lack of context": 4,
     "Poor shuffle": 4,
     "Shuffle not working": 3,
     "none": 3,
     "Same songs/artists repeated in daily mixes": 2,
-    "Lack of new music": 2
+    "algorithm chooses music, not user": 2
   },
   "top_unmet_needs": {
     "None": 36,
-    "New music": 17,
+    "New music": 16,
     "Personalization": 5,
     "More control": 5,
+    "Variety in music recommendations": 4,
     "Control over playlists": 4,
-    "Variety in music recommendations": 3,
     "New music discovery": 3,
     "Variety in recommendations": 3,
     "Music variety": 3,
