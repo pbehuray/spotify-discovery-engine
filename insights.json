@@ -1,22 +1,22 @@
 {
   "total_reviews": 1000,
   "discovery_related": {
-    "count": 227,
-    "percent": 22.7
+    "count": 226,
+    "percent": 22.6
   },
   "by_frustration_type": {
-    "stale_recommendations": 65,
+    "stale_recommendations": 63,
     "none": 48,
     "control_loss": 42,
     "discovery_friction": 27,
-    "algorithmic_sameness": 19,
+    "algorithmic_sameness": 20,
     "context_blindness": 12,
     "poor_new_release_surfacing": 6,
     "filter_bubble_lock_in": 5,
     "over_personalization": 3
   },
   "by_segment": {
-    "active_explorer": 164,
+    "active_explorer": 163,
     "mood_listener": 19,
     "unknown": 17,
     "lapsed_explorer": 12,
@@ -26,7 +26,7 @@
   },
   "by_desired_behavior": {
     "find_new_artists": 110,
-    "break_routine": 45,
+    "break_routine": 44,
     "none": 40,
     "match_mood_or_context": 28,
     "deep_dive_genre": 3,
@@ -36,17 +36,17 @@
     "play_store": 152,
     "forum": 31,
     "social": 25,
-    "reddit": 15,
+    "reddit": 14,
     "app_store": 4
   },
   "segment_x_frustration_crosstab": {
     "active_explorer": {
-      "stale_recommendations": 55,
+      "stale_recommendations": 53,
       "control_loss": 26,
       "discovery_friction": 19,
       "filter_bubble_lock_in": 4,
       "none": 29,
-      "algorithmic_sameness": 17,
+      "algorithmic_sameness": 18,
       "poor_new_release_surfacing": 5,
       "over_personalization": 3,
       "context_blindness": 6
@@ -87,9 +87,9 @@
     "None": 31,
     "Lack of control": 20,
     "Poor algorithm": 10,
-    "Lack of variety": 4,
     "Lack of context": 4,
     "Poor shuffle": 4,
+    "Lack of variety": 3,
     "Shuffle not working": 3,
     "none": 3,
     "Same songs/artists repeated in daily mixes": 2,
@@ -97,13 +97,13 @@
   },
   "top_unmet_needs": {
     "None": 36,
-    "New music": 16,
+    "New music": 14,
     "Personalization": 5,
     "More control": 5,
-    "Variety in music recommendations": 4,
+    "Variety in recommendations": 4,
     "Control over playlists": 4,
+    "Variety in music recommendations": 3,
     "New music discovery": 3,
-    "Variety in recommendations": 3,
     "Music variety": 3,
     "True randomness": 3
   }
