@@ -85,7 +85,7 @@
   },
   "top_root_causes": {
     "None": 31,
-    "Lack of control": 20,
+    "Lack of control": 19,
     "Poor algorithm": 10,
     "Lack of context": 4,
     "Poor shuffle": 4,
@@ -98,13 +98,13 @@
   "top_unmet_needs": {
     "None": 36,
     "New music": 14,
+    "Variety in music recommendations": 5,
     "Personalization": 5,
     "More control": 5,
-    "Variety in recommendations": 4,
     "Control over playlists": 4,
-    "Variety in music recommendations": 3,
-    "New music discovery": 3,
+    "Variety in recommendations": 3,
     "Music variety": 3,
-    "True randomness": 3
+    "True randomness": 3,
+    "none": 3
   }
 }
