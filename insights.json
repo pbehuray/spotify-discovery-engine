@@ -1,14 +1,14 @@
 {
   "total_reviews": 1000,
   "discovery_related": {
-    "count": 226,
-    "percent": 22.6
+    "count": 225,
+    "percent": 22.5
   },
   "by_frustration_type": {
     "stale_recommendations": 63,
     "none": 48,
     "control_loss": 42,
-    "discovery_friction": 27,
+    "discovery_friction": 26,
     "algorithmic_sameness": 20,
     "context_blindness": 12,
     "poor_new_release_surfacing": 6,
@@ -16,18 +16,18 @@
     "over_personalization": 3
   },
   "by_segment": {
-    "active_explorer": 162,
+    "active_explorer": 163,
     "mood_listener": 19,
-    "unknown": 18,
-    "lapsed_explorer": 12,
+    "unknown": 17,
+    "lapsed_explorer": 11,
     "genre_loyalist": 7,
     "podcast_first": 6,
     "passive_listener": 2
   },
   "by_desired_behavior": {
-    "find_new_artists": 110,
-    "break_routine": 43,
-    "none": 41,
+    "find_new_artists": 109,
+    "break_routine": 44,
+    "none": 40,
     "match_mood_or_context": 28,
     "deep_dive_genre": 3,
     "social_discovery": 1
@@ -36,7 +36,7 @@
     "play_store": 152,
     "forum": 31,
     "social": 25,
-    "reddit": 14,
+    "reddit": 13,
     "app_store": 4
   },
   "segment_x_frustration_crosstab": {
@@ -46,7 +46,7 @@
       "discovery_friction": 19,
       "filter_bubble_lock_in": 4,
       "none": 29,
-      "algorithmic_sameness": 17,
+      "algorithmic_sameness": 18,
       "poor_new_release_surfacing": 5,
       "over_personalization": 3,
       "context_blindness": 6
@@ -58,13 +58,13 @@
       "none": 1
     },
     "lapsed_explorer": {
-      "discovery_friction": 4,
+      "discovery_friction": 3,
       "stale_recommendations": 7,
       "control_loss": 1
     },
     "unknown": {
-      "algorithmic_sameness": 3,
       "none": 4,
+      "algorithmic_sameness": 2,
       "discovery_friction": 4,
       "control_loss": 5,
       "stale_recommendations": 2
