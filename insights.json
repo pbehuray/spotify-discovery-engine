@@ -16,20 +16,20 @@
     "over_personalization": 3
   },
   "by_segment": {
-    "active_explorer": 163,
+    "active_explorer": 164,
     "mood_listener": 19,
     "unknown": 17,
     "lapsed_explorer": 11,
-    "genre_loyalist": 7,
+    "genre_loyalist": 6,
     "podcast_first": 6,
     "passive_listener": 2
   },
   "by_desired_behavior": {
-    "find_new_artists": 109,
+    "find_new_artists": 110,
     "break_routine": 44,
     "none": 40,
     "match_mood_or_context": 28,
-    "deep_dive_genre": 3,
+    "deep_dive_genre": 2,
     "social_discovery": 1
   },
   "by_source": {
@@ -44,7 +44,7 @@
       "stale_recommendations": 53,
       "control_loss": 26,
       "discovery_friction": 19,
-      "filter_bubble_lock_in": 4,
+      "filter_bubble_lock_in": 5,
       "none": 29,
       "algorithmic_sameness": 18,
       "poor_new_release_surfacing": 5,
@@ -53,7 +53,6 @@
     },
     "genre_loyalist": {
       "control_loss": 4,
-      "filter_bubble_lock_in": 1,
       "poor_new_release_surfacing": 1,
       "none": 1
     },
@@ -92,8 +91,8 @@
     "Shuffle not working": 3,
     "none": 3,
     "Same songs/artists repeated in daily mixes": 2,
-    "algorithm chooses music, not user": 2,
-    "Lack of variety": 2
+    "Lack of variety": 2,
+    "Limited song rotation": 2
   },
   "top_unmet_needs": {
     "None": 36,
