@@ -91,8 +91,8 @@
     "Shuffle not working": 3,
     "none": 3,
     "Same songs/artists repeated in daily mixes": 2,
-    "Lack of variety": 2,
-    "Limited song rotation": 2
+    "algorithm chooses music, not user": 2,
+    "Lack of variety": 2
   },
   "top_unmet_needs": {
     "None": 36,
